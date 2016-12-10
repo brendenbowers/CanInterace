@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CanInterface.MCP2515.BitStructures
 {
-    public struct BufferFullPinControlRegister
+    public struct ReceiveBufferFullPinControlAndStatusRegister
     {
         /// <summary>
         /// RX1BF Pin State bit (Digital Output mode only)
@@ -45,7 +45,7 @@ namespace CanInterface.MCP2515.BitStructures
         public bool B0BFM;
 
 
-        public BufferFullPinControlRegister(byte value)
+        public ReceiveBufferFullPinControlAndStatusRegister(byte value)
         {
             B1BFS = value.GetBit(5);
             B0BFS = value.GetBit(4);
@@ -55,7 +55,7 @@ namespace CanInterface.MCP2515.BitStructures
             B0BFM = value.GetBit(0);
         }
 
-        public BufferFullPinControlRegister(bool b1bfs, bool b0bfs, bool b1bfe, bool b0bfe, bool b1bfm, bool b0bfm)
+        public ReceiveBufferFullPinControlAndStatusRegister(bool b1bfs, bool b0bfs, bool b1bfe, bool b0bfe, bool b1bfm, bool b0bfm)
         {
             B1BFS = b1bfs;
             B0BFS = b0bfs;

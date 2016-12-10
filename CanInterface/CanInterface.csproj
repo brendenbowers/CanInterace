@@ -109,7 +109,7 @@
   <ItemGroup>
     <Compile Include="Extensions\ByteExtensions.cs" />
     <Compile Include="Extensions\SpiDeviceExtensions.cs" />
-    <Compile Include="MCP2515\BitStructures\BufferFullPinControlRegister.cs" />
+    <Compile Include="MCP2515\BitStructures\ReceiveBufferFullPinControlAndStatusRegister.cs" />
     <Compile Include="MCP2515\BitStructures\CanControlRegister.cs" />
     <Compile Include="MCP2515\BitStructures\CanInterruptEnableRegister.cs" />
     <Compile Include="MCP2515\BitStructures\CanInterruptFlagRegister.cs" />
@@ -118,6 +118,9 @@
     <Compile Include="MCP2515\BitStructures\Configuration2Register.cs" />
     <Compile Include="MCP2515\BitStructures\Configuration3Register.cs" />
     <Compile Include="MCP2515\BitStructures\ErrorFlagRegister.cs" />
+    <Compile Include="MCP2515\BitStructures\ReceiveBuffer1Control.cs" />
+    <Compile Include="MCP2515\BitStructures\ReceiveBuffer0Control.cs" />
+    <Compile Include="MCP2515\BitStructures\TransmitBufferControlRegister.cs" />
     <Compile Include="MCP2515\BitStructures\TransmitRequestToSendControlRegister.cs" />
     <Compile Include="MCP2515\Enum\BufferType.cs" />
     <Compile Include="MCP2515\Enum\ClockOutPrescaler.cs" />
@@ -130,10 +133,12 @@
     <Compile Include="MCP2515\Enum\Commands.cs" />
     <Compile Include="MCP2515\Enum\InterruptFlagCode.cs" />
     <Compile Include="MCP2515\Enum\MessageType.cs" />
+    <Compile Include="MCP2515\Enum\ReceiveBufferOperatingMode.cs" />
     <Compile Include="MCP2515\Enum\RecievedMessage.cs" />
     <Compile Include="MCP2515\Enum\Registers.cs" />
     <Compile Include="MCP2515\Enum\OperatingMode.cs" />
     <Compile Include="MCP2515\Enum\SyncronizationJumpWidth.cs" />
+    <Compile Include="MCP2515\Enum\TransmitBufferPriority.cs" />
     <Compile Include="MCP2515\NoAvailableBuffersException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\CanInterface.rd.xml" />

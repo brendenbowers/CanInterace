@@ -51,6 +51,18 @@ namespace CanInterface.MCP2515.BitStructures
             (MERRF, WAKIF, ERRIF, TX2IF, TX1IF, TX0IF, RX1IF, RX0IF) = value.GetBits();
         }
 
+        public CanInterruptFlagRegister(bool merrf, bool wakif, bool errif, bool tx2if, bool tx1if, bool tx0if, bool rx1if, bool rx0if)
+        {
+            MERRF = merrf;
+            WAKIF = wakif;
+            ERRIF = errif;
+            TX2IF = tx2if;
+            TX1IF = tx1if;
+            TX0IF = tx0if;
+            RX1IF = rx1if;
+            RX0IF = rx0if;
+        }
+
         public byte ToByte()
         {
             return ((byte)(0b0000_0000)).SetBits(MERRF, WAKIF, ERRIF, TX2IF, TX1IF, TX0IF, RX1IF, RX0IF);
