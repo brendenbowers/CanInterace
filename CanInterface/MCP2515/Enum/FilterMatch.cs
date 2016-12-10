@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CanInterface.MCP2515.BitStructures.Enum
+namespace CanInterface.MCP2515.Enum
 {
     public enum FilterMatch : byte
     {

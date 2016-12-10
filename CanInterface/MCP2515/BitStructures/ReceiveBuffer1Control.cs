@@ -1,5 +1,4 @@
 ﻿using CanInterface.Extensions;
-using CanInterface.MCP2515.BitStructures.Enum;
 using CanInterface.MCP2515.Enum;
 using System;
 using System.Collections.Generic;
