@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CanInterface.MCP2515
+namespace CanInterface.MCP2515.Exceptions
 {
     public class NoAvailableBuffersException : Exception
     {

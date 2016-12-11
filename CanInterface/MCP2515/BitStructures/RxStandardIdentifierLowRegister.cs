@@ -42,6 +42,16 @@ namespace CanInterface.MCP2515.BitStructures
         {
             return ((byte)(SIDL | EID)).Set(3, IDE);
         }
-        
+
+
+        public static implicit operator byte(RxStandardIdentifierLowRegister register)
+        {
+            return register.ToByte();
+        }
+
+        public static implicit operator RxStandardIdentifierLowRegister(byte register)
+        {
+            return new RxStandardIdentifierLowRegister(register);
+        }
     }
 }

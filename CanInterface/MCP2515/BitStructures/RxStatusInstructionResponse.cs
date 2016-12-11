@@ -38,5 +38,9 @@ namespace CanInterface.MCP2515.BitStructures
             FilterMatch = (FilterMatch)(value & (byte)FilterMatch.MASK);
         }
 
+        public static implicit operator RxStatusInstructionResponse(byte register)
+        {
+            return new RxStatusInstructionResponse(register);
+        }
     }
 }

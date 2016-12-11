@@ -73,5 +73,15 @@ namespace CanInterface.MCP2515.BitStructures
 
             return value;
         }
+
+        public static implicit operator byte(CanControlRegister register)
+        {
+            return register.ToByte();
+        }
+
+        public static implicit operator CanControlRegister(byte register)
+        {
+            return new CanControlRegister(register);
+        }
     }
 }

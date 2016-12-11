@@ -23,5 +23,10 @@ namespace CanInterface.MCP2515.BitStructures
             OperatingMode = (OperatingMode)(value & (byte)OperatingMode.MASK);
             InterruptFlagCode = (InterruptFlagCode)(value & (byte)InterruptFlagCode.MASK);
         }
+
+        public static implicit operator CanStatusRegister(byte register)
+        {
+            return new CanStatusRegister(register);
+        }
     }
 }

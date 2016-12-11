@@ -69,5 +69,15 @@ namespace CanInterface.MCP2515.BitStructures
         {
             return ((byte)(0b0000_0000)).SetBits(false, false, B1BFS, B0BFS, B1BFE, B0BFE, B1BFM, B0BFM);
         }
+
+        public static implicit operator byte(ReceiveBufferFullPinControlAndStatusRegister register)
+        {
+            return register.ToByte();
+        }
+
+        public static implicit operator ReceiveBufferFullPinControlAndStatusRegister(byte register)
+        {
+            return new ReceiveBufferFullPinControlAndStatusRegister(register);
+        }
     }
 }

@@ -48,5 +48,15 @@ namespace CanInterface.MCP2515.BitStructures
         {
             return PHSEG2.Set(7, SOF).Set(6, WAKFIL);
         }
+
+        public static implicit operator byte(Configuration3Register register)
+        {
+            return register.ToByte();
+        }
+
+        public static implicit operator Configuration3Register(byte register)
+        {
+            return new Configuration3Register(register);
+        }
     }
 }

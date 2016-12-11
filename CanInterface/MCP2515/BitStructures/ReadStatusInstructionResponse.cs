@@ -56,5 +56,10 @@ namespace CanInterface.MCP2515.BitStructures
             TXB2CNTRL_TXREQ = responseData.GetBit(6);
             CANINTF_TX2IF = responseData.GetBit(7);
         }
+
+        public static implicit operator ReadStatusInstructionResponse(byte register)
+        {
+            return new ReadStatusInstructionResponse(register);
+        }
     }
 }

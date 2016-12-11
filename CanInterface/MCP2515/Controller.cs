@@ -1,6 +1,7 @@
 ﻿using CanInterface.Extensions;
 using CanInterface.MCP2515.BitStructures;
 using CanInterface.MCP2515.Enum;
+using CanInterface.MCP2515.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -83,7 +84,7 @@ namespace CanInterface.MCP2515
         /// <returns></returns>
         public CanStatusRegister ReadCanStatus()
         {
-            return new CanStatusRegister(ReadRegister(Registers.CANSTAT));
+            return ReadRegister(Registers.CANSTAT);
         }
 
         /// <summary>
@@ -132,7 +133,7 @@ namespace CanInterface.MCP2515
             var messageSent = false;
             while(DateTime.Now < timeoutTime && !messageSent)
             {
-                var register = new CanInterruptFlagRegister(ReadRegister(Registers.CANINTF));
+                CanInterruptFlagRegister register = ReadRegister(Registers.CANINTF);
 
                 switch (intf)
                 {
@@ -187,16 +188,16 @@ namespace CanInterface.MCP2515
 
             while(DateTime.Now < timeoutTime && rxBuffer == null)
             {
-                var interrupts = new CanInterruptFlagRegister(ReadRegister(Registers.CANINTF));
+                CanInterruptFlagRegister interrupts = ReadRegister(Registers.CANINTF);
                 
                 if((buffer == ReceieveBuffer.RX0 || buffer == ReceieveBuffer.Both) && interrupts.RX0IF)
                 {
-                    isRemote = new ReceiveBuffer0Control(ReadRegister(Registers.RXB0CTRL)).RXRTR;
+                    isRemote = ((ReceiveBuffer0Control)ReadRegister(Registers.RXB0CTRL)).RXRTR;
                     rxBuffer = ReadRxBuffer(Enum.ReadRxBuffer.RXB0SIDH);
                 }
                 else if((buffer == ReceieveBuffer.RX1 || buffer == ReceieveBuffer.Both) && interrupts.RX1IF)
                 {
-                    isRemote = new ReceiveBuffer1Control(ReadRegister(Registers.RXB1CTRL)).RXRTR;
+                    isRemote = ((ReceiveBuffer1Control)ReadRegister(Registers.RXB1CTRL)).RXRTR;
                     rxBuffer = ReadRxBuffer(Enum.ReadRxBuffer.RXB1SIDH);
                 }
             }
@@ -206,19 +207,21 @@ namespace CanInterface.MCP2515
                 return (false, null);
             }
                        
+            
+
+            RxStandardIdentifierHighRegister sidhRegister = rxBuffer[0];
+            RxStandardIdentifierLowRegister sidlRegister = rxBuffer[1];
+
             RxExtendendedIdentifier8Register? eid8Register = null;
             RxExtendendedIdentifier0Register? eid0Register = null;
 
-            var sidhRegister = new RxStandardIdentifierHighRegister(rxBuffer[0]);
-            var sidlRegister = new RxStandardIdentifierLowRegister(rxBuffer[1]);
-
-            if(sidlRegister.IDE)
+            if (sidlRegister.IDE)
             {
-                eid8Register = new RxExtendendedIdentifier8Register(rxBuffer[2]);
-                eid0Register = new RxExtendendedIdentifier0Register(rxBuffer[3]);
+                eid8Register = rxBuffer[2];
+                eid0Register = rxBuffer[3];
             }
 
-            var dlcRegister = new RxDataLengthCodeRegister(rxBuffer[4]);
+            RxDataLengthCodeRegister dlcRegister = rxBuffer[4];
 
             var data = new byte[dlcRegister.DLC];
 
@@ -380,7 +383,7 @@ namespace CanInterface.MCP2515
             var buffer = new byte[1];
             spiDevice.TransferSequential(new byte[] { Commands.READ_STATUS }, buffer);
 
-            return new ReadStatusInstructionResponse(buffer[0]);
+            return buffer[0];
         }
                 
         /// <summary>
@@ -450,6 +453,26 @@ namespace CanInterface.MCP2515
         {
             return Task.Run(() => LoadTxBuffer(bufferToLoad, values));
         }
+
+        public void SetOperatingMode(OperatingMode mode, ReceiveBufferOperatingMode rx0BufferMode, ReceiveBufferOperatingMode rx1BufferMode, bool rollOverBuffer0To1)
+        {
+            var current = new CanControlRegister(ReadRegister(Registers.CANCTRL));
+
+            var newOperatingMode = new CanControlRegister(mode, current.ABAT, current.OSM, current.CLKEN, current.CLKPRE);
+
+            WriteRegister(Registers.CANCTRL, newOperatingMode.ToByte());
+
+            var status = new CanStatusRegister(ReadRegister(Registers.CANSTAT));
+
+            if(status.OperatingMode != newOperatingMode.REQOP)
+            {
+                throw new InvalidOperatingModeExcpetion(newOperatingMode.REQOP, status.OperatingMode);
+            }
+
+            WriteRegister(Registers.RXB0CTRL, new ReceiveBuffer0Control(rx0BufferMode, rollOverBuffer0To1));
+            WriteRegister(Registers.RXB1CTRL, new ReceiveBuffer1Control(rx1BufferMode));
+        }
+
 
     }
 }

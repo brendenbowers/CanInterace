@@ -38,5 +38,15 @@ namespace CanInterface.MCP2515.BitStructures
         {
             return (byte)TXP;
         }
+
+        public static implicit operator byte(TransmitBufferControlRegister register)
+        {
+            return register.ToByte();
+        }
+
+        public static implicit operator TransmitBufferControlRegister(byte register)
+        {
+            return new TransmitBufferControlRegister(register);
+        }
     }
 }

@@ -27,5 +27,15 @@ namespace CanInterface.MCP2515.BitStructures
         {
             return EID;
         }
+
+        public static implicit operator byte(TxExtendendedIdentifier8Register register)
+        {
+            return register.ToByte();
+        }
+
+        public static implicit operator TxExtendendedIdentifier8Register(byte register)
+        {
+            return new TxExtendendedIdentifier8Register(register);
+        }
     }
 }

@@ -67,5 +67,15 @@ namespace CanInterface.MCP2515.BitStructures
         {
             return ((byte)(0b0000_0000)).SetBits(MERRF, WAKIF, ERRIF, TX2IF, TX1IF, TX0IF, RX1IF, RX0IF);
         }
+
+        public static implicit operator byte(CanInterruptFlagRegister register)
+        {
+            return register.ToByte();
+        }
+
+        public static implicit operator CanInterruptFlagRegister(byte register)
+        {
+            return new CanInterruptFlagRegister(register);
+        }
     }
 }

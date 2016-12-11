@@ -59,5 +59,15 @@ namespace CanInterface.MCP2515.BitStructures
         {
             return (byte)RXM;
         }
+
+        public static implicit operator byte(ReceiveBuffer1Control register)
+        {
+            return register.ToByte();
+        }
+
+        public static implicit operator ReceiveBuffer1Control(byte register)
+        {
+            return new ReceiveBuffer1Control(register);
+        }
     }
 }

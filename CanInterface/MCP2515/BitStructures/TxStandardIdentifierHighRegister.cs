@@ -34,6 +34,16 @@ namespace CanInterface.MCP2515.BitStructures
             return SIDH;
         }
 
+        public static implicit operator byte(TxStandardIdentifierHighRegister register)
+        {
+            return register.ToByte();
+        }
+
+        public static implicit operator TxStandardIdentifierHighRegister(byte register)
+        {
+            return new TxStandardIdentifierHighRegister(register);
+        }
+
 
     }
 }

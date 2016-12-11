@@ -55,11 +55,11 @@ namespace CanInterface.MCP2515
             var registers = ToTransmitRegisters();
 
             var buffer = new byte[13];
-            buffer[0] = registers.sidh.ToByte();
-            buffer[1] = registers.sidl.ToByte();
+            buffer[0] = registers.sidh;
+            buffer[1] = registers.sidl;
             buffer[2] = IsRemote ? registers.eid8.ToByte() : (byte)0;
             buffer[3] = IsRemote ? registers.eid0.ToByte() : (byte)0;
-            buffer[4] = registers.dlc.ToByte();
+            buffer[4] = registers.dlc;
 
             Array.ConstrainedCopy(registers.data, 0, buffer, 5, Data.Length);
 

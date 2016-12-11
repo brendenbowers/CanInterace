@@ -24,5 +24,15 @@ namespace CanInterface.MCP2515.BitStructures
         }
 
 
+        public static implicit operator byte(RxStandardIdentifierHighRegister register)
+        {
+            return register.ToByte();
+        }
+
+        public static implicit operator RxStandardIdentifierHighRegister(byte register)
+        {
+            return new RxStandardIdentifierHighRegister(register);
+        }
+
     }
 }

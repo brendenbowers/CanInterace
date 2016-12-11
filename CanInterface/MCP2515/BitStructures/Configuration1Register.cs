@@ -35,5 +35,15 @@ namespace CanInterface.MCP2515.BitStructures
         {
             return (byte)(BRP | (byte)SJW);
         }
+
+        public static implicit operator byte(Configuration1Register register)
+        {
+            return register.ToByte();
+        }
+
+        public static implicit operator Configuration1Register(byte register)
+        {
+            return new Configuration1Register(register);
+        }
     }
 }

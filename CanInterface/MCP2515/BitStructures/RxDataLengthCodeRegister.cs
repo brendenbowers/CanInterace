@@ -34,5 +34,15 @@ namespace CanInterface.MCP2515.BitStructures
         {
             return DLC.Set(6, RTR);
         }
+
+        public static implicit operator byte(RxDataLengthCodeRegister register)
+        {
+            return register.ToByte();
+        }
+
+        public static implicit operator RxDataLengthCodeRegister(byte register)
+        {
+            return new RxDataLengthCodeRegister(register);
+        }
     }
 }

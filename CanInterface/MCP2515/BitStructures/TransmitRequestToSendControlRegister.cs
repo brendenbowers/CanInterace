@@ -71,5 +71,15 @@ namespace CanInterface.MCP2515.BitStructures
         {
             return ((byte)(0b0000_0000)).SetBits(false, false, false, false, false, B2RTSM, B1RTSM, B0RTSM);
         }
+
+        public static implicit operator byte(TransmitRequestToSendControlRegister register)
+        {
+            return register.ToByte();
+        }
+
+        public static implicit operator TransmitRequestToSendControlRegister(byte register)
+        {
+            return new TransmitRequestToSendControlRegister(register);
+        }
     }
 }

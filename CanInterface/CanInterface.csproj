@@ -152,7 +152,8 @@
     <Compile Include="MCP2515\Enum\OperatingMode.cs" />
     <Compile Include="MCP2515\Enum\SyncronizationJumpWidth.cs" />
     <Compile Include="MCP2515\Enum\TransmitBufferPriority.cs" />
-    <Compile Include="MCP2515\NoAvailableBuffersException.cs" />
+    <Compile Include="MCP2515\Exceptions\InvalidOperatingModeExcpetion.cs" />
+    <Compile Include="MCP2515\Exceptions\NoAvailableBuffersException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\CanInterface.rd.xml" />
   </ItemGroup>

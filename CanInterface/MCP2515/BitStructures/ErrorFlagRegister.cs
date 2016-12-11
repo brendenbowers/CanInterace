@@ -79,5 +79,15 @@ namespace CanInterface.MCP2515.BitStructures
         {
             return ((byte)0b0000_0000).Set(7, RX1OVR).Set(6, RX0OVR);
         }
+
+        public static implicit operator byte(ErrorFlagRegister register)
+        {
+            return register.ToByte();
+        }
+
+        public static implicit operator ErrorFlagRegister(byte register)
+        {
+            return new ErrorFlagRegister(register);
+        }
     }
 }

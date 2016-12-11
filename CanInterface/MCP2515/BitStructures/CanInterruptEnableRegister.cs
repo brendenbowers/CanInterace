@@ -64,5 +64,14 @@ namespace CanInterface.MCP2515.BitStructures
         {
             return ((byte)(0b0000_0000)).SetBits(MERRE, WAKIE, ERRIE, TX2IE, TX1IE, TX0IE, RX1IE, RX0IE);
         }
+        public static implicit operator byte(CanInterruptEnableRegister register)
+        {
+            return register.ToByte();
+        }
+
+        public static implicit operator CanInterruptEnableRegister(byte register)
+        {
+            return new CanInterruptEnableRegister(register);
+        }
     }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CanInterface.MCP2515.BitStructures
 {
-    public class Configuration2Register
+    public struct Configuration2Register
     {
         /// <summary>
         /// PS2 Bit Time Length bit
@@ -55,6 +55,16 @@ namespace CanInterface.MCP2515.BitStructures
             value |= PHSEG1;
             value |= PRSEG;
             return value;
+        }
+
+        public static implicit operator byte(Configuration2Register register)
+        {
+            return register.ToByte();
+        }
+
+        public static implicit operator Configuration2Register(byte register)
+        {
+            return new Configuration2Register(register);
         }
     }
 }
