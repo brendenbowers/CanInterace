@@ -128,7 +128,13 @@ namespace CanInterface.MCP2515
                     throw new NoAvailableBuffersException(BufferType.Transmit);
             }
 
-
+            if(message.IsExtended)
+            {
+                // Split the 11 bit and 18 bit sections of the ID.
+                var bit11Address = (uint)((message.CanId >> 16) & 0xFFFF);
+                var bit18Address = (uint)(message.CanId& 0xFFFFF);
+                WriteRegister(sidh, (byte)(bit11Address >> 5));
+            }
 
         }
 

@@ -109,6 +109,12 @@
   <ItemGroup>
     <Compile Include="Extensions\ByteExtensions.cs" />
     <Compile Include="Extensions\SpiDeviceExtensions.cs" />
+    <Compile Include="MCP2515\BitStructures\RxDataLengthCodeRegister.cs" />
+    <Compile Include="MCP2515\BitStructures\TxDataLengthCodeRegister.cs" />
+    <Compile Include="MCP2515\BitStructures\RxExtendendedIdentifier0Register.cs" />
+    <Compile Include="MCP2515\BitStructures\TxExtendendedIdentifier0Register.cs" />
+    <Compile Include="MCP2515\BitStructures\RxExtendendedIdentifier8Register.cs" />
+    <Compile Include="MCP2515\BitStructures\TxExtendendedIdentifier8Register.cs" />
     <Compile Include="MCP2515\BitStructures\ReceiveBufferFullPinControlAndStatusRegister.cs" />
     <Compile Include="MCP2515\BitStructures\CanControlRegister.cs" />
     <Compile Include="MCP2515\BitStructures\CanInterruptEnableRegister.cs" />
@@ -120,6 +126,10 @@
     <Compile Include="MCP2515\BitStructures\ErrorFlagRegister.cs" />
     <Compile Include="MCP2515\BitStructures\ReceiveBuffer1Control.cs" />
     <Compile Include="MCP2515\BitStructures\ReceiveBuffer0Control.cs" />
+    <Compile Include="MCP2515\BitStructures\RxStandardIdentifierHighRegister.cs" />
+    <Compile Include="MCP2515\BitStructures\TxStandardIdentifierHighRegister.cs" />
+    <Compile Include="MCP2515\BitStructures\RxStandardIdentifierLowRegister.cs" />
+    <Compile Include="MCP2515\BitStructures\TxStandardIdentifierLowRegister.cs" />
     <Compile Include="MCP2515\BitStructures\TransmitBufferControlRegister.cs" />
     <Compile Include="MCP2515\BitStructures\TransmitRequestToSendControlRegister.cs" />
     <Compile Include="MCP2515\Enum\BufferType.cs" />
