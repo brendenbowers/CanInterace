@@ -39,6 +39,10 @@ namespace CanInterface.MCP2515
 
         }
 
+        /// <summary>
+        /// Converts the message to registers to be written to the device
+        /// </summary>
+        /// <returns>the SIDH, SIDL, EID8, EID0, DLC, and Data to be written</returns>
         public (TxStandardIdentifierHighRegister sidh, TxStandardIdentifierLowRegister sidl, TxExtendendedIdentifier8Register eid8, 
             TxExtendendedIdentifier0Register eid0, TxDataLengthCodeRegister dlc, byte[] data) ToTransmitRegisters()
         {
@@ -46,5 +50,20 @@ namespace CanInterface.MCP2515
                 new TxExtendendedIdentifier0Register(CanId), new TxDataLengthCodeRegister(IsRemote, Convert.ToByte(Data.Length)), Data);
         }
         
+        public byte[] ToTransmitRegisterBytes()
+        {
+            var registers = ToTransmitRegisters();
+
+            var buffer = new byte[13];
+            buffer[0] = registers.sidh.ToByte();
+            buffer[1] = registers.sidl.ToByte();
+            buffer[2] = IsRemote ? registers.eid8.ToByte() : (byte)0;
+            buffer[3] = IsRemote ? registers.eid0.ToByte() : (byte)0;
+            buffer[4] = registers.dlc.ToByte();
+
+            Array.ConstrainedCopy(registers.data, 0, buffer, 5, Data.Length);
+
+            return buffer;
+        }
     }
 }

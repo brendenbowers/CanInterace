@@ -142,7 +142,9 @@
     <Compile Include="MCP2515\Controller.cs" />
     <Compile Include="MCP2515\Enum\Commands.cs" />
     <Compile Include="MCP2515\Enum\InterruptFlagCode.cs" />
+    <Compile Include="MCP2515\Enum\LoadTxBuffer.cs" />
     <Compile Include="MCP2515\Enum\MessageType.cs" />
+    <Compile Include="MCP2515\Enum\ReadRxBuffer.cs" />
     <Compile Include="MCP2515\Enum\ReceieveBuffer.cs" />
     <Compile Include="MCP2515\Enum\ReceiveBufferOperatingMode.cs" />
     <Compile Include="MCP2515\Enum\RecievedMessage.cs" />

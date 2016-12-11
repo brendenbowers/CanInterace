@@ -94,66 +94,35 @@ namespace CanInterface.MCP2515
         /// <returns>True if the message was sent, false if the timeout occured before the message was sent</returns>
         public bool Transmit(CanMessage message, TimeSpan? timeout = null)
         {
-            byte sidh = 0;
-            byte sidl = 0;
-            byte eid8 = 0;
-            byte eid0 = 0;
-            byte rtr = 0;
-            byte dlc = 0;
             byte ctrl = 0;
             byte intf = 0;
-            byte txbd = 0;
 
             var status = ReadStatus();
+            LoadTxBuffer txBuffer;
 
             switch (status)
             {
                 case ReadStatusInstructionResponse s when (!status.TXB0CNTRL_TXREQ && !status.CANINTF_TX0IF):
-                    sidh = Registers.TXB0SIDH;
-                    sidl = Registers.TXB0SIDL;
-                    eid8 = Registers.TXB0EID8;
-                    eid0 = Registers.TXB0EID0;
-                    rtr = Registers.TXB0DLC;
-                    dlc = Registers.TXB0DLC;
                     ctrl = Registers.TXB0CTRL;
                     intf = Registers.TX0IF;
-                    txbd = Registers.TXB0D0;
+                    txBuffer = Enum.LoadTxBuffer.TX0SIDH;
                     break;
                 case ReadStatusInstructionResponse s when (!status.TXB1CNTRL_TXREQ && !status.CANINTF_TX1IF):
-                    sidh = Registers.TXB1SIDH;
-                    sidl = Registers.TXB1SIDL;
-                    eid8 = Registers.TXB1EID8;
-                    eid0 = Registers.TXB1EID0;
-                    rtr = Registers.TXB1DLC;
-                    dlc = Registers.TXB1DLC;
                     ctrl = Registers.TXB1CTRL;
                     intf = Registers.TX1IF;
-                    txbd = Registers.TXB1D0;
+                    txBuffer = Enum.LoadTxBuffer.TX1SIDH;
                     break;
                 case ReadStatusInstructionResponse s when (!status.TXB2CNTRL_TXREQ && !status.CANINTF_TX2IF):
-                    sidh = Registers.TXB2SIDH;
-                    sidl = Registers.TXB2SIDL;
-                    eid8 = Registers.TXB2EID8;
-                    eid0 = Registers.TXB2EID0;
-                    rtr = Registers.TXB2DLC;
-                    dlc = Registers.TXB2DLC;
                     ctrl = Registers.TXB2CTRL;
                     intf = Registers.TX2IF;
-                    txbd = Registers.TXB2D0;
+                    txBuffer = Enum.LoadTxBuffer.TX2SIDH;
                     break;
                 default:
                     throw new NoAvailableBuffersException(BufferType.Transmit);
             }
 
-            var txRegisters = message.ToTransmitRegisters();
-
-            ///write the can message message to the various registers
-            WriteRegister(sidh, txRegisters.sidh.ToByte());
-            WriteRegister(sidl, txRegisters.sidl.ToByte());
-            WriteRegister(eid8, message.IsExtended ? txRegisters.eid8.ToByte() : (byte)0);
-            WriteRegister(eid0, message.IsExtended ? txRegisters.eid0.ToByte() : (byte)0);
-            WriteRegister(dlc, txRegisters.dlc.ToByte());
-            WriteRegister(txbd, txRegisters.data);
+            //load the buffer with the data from the can message
+            LoadTxBuffer(txBuffer, message.ToTransmitRegisterBytes());
 
             //tell the controller we are ready to transmit
             WriteRegisterBit(ctrl, Registers.TXREQ, 1);
@@ -213,78 +182,47 @@ namespace CanInterface.MCP2515
         {
             var timeoutTime = DateTime.Now.Add(timeout ?? ReceiveDefaultTimeout);
 
-            byte sidh = 0;
-            byte sidl = 0;
-            byte eid8 = 0;
-            byte eid0 = 0;
-            byte rtr = 0;
-            byte dlc = 0;
-            byte ctrl = 0;
-            byte intf = 0;
-            byte rxbd = 0;
-
             bool isRemote = false;
+            byte[] rxBuffer = null; 
 
-            var readMessage = false;
-            while(DateTime.Now < timeoutTime && !readMessage)
+            while(DateTime.Now < timeoutTime && rxBuffer == null)
             {
                 var interrupts = new CanInterruptFlagRegister(ReadRegister(Registers.CANINTF));
                 
                 if((buffer == ReceieveBuffer.RX0 || buffer == ReceieveBuffer.Both) && interrupts.RX0IF)
                 {
-                    sidh = Registers.RXB0SIDH;
-                    sidl = Registers.RXB0SIDL;
-                    eid8 = Registers.RXB0EID8;
-                    eid0 = Registers.RXB0EID0;
-                    rtr = Registers.RXB0DLC;
-                    dlc = Registers.RXB0DLC;
-                    ctrl = Registers.RXB0CTRL;
-                    intf = Registers.RX0IF;
-                    rxbd = Registers.RXB0D0;
-                    readMessage = true;
-
-                    isRemote = new ReceiveBuffer0Control(ReadRegister(ctrl)).RXRTR;
+                    isRemote = new ReceiveBuffer0Control(ReadRegister(Registers.RXB0CTRL)).RXRTR;
+                    rxBuffer = ReadRxBuffer(Enum.ReadRxBuffer.RXB0SIDH);
                 }
                 else if((buffer == ReceieveBuffer.RX1 || buffer == ReceieveBuffer.Both) && interrupts.RX1IF)
                 {
-                    sidh = Registers.RXB1SIDH;
-                    sidl = Registers.RXB1SIDL;
-                    eid8 = Registers.RXB1EID8;
-                    eid0 = Registers.RXB1EID0;
-                    rtr = Registers.RXB1DLC;
-                    dlc = Registers.RXB1DLC;
-                    ctrl = Registers.RXB1CTRL;
-                    intf = Registers.RX1IF;
-                    rxbd = Registers.RXB1D0;
-                    readMessage = true;
-
-                    isRemote = new ReceiveBuffer1Control(ReadRegister(ctrl)).RXRTR;
+                    isRemote = new ReceiveBuffer1Control(ReadRegister(Registers.RXB1CTRL)).RXRTR;
+                    rxBuffer = ReadRxBuffer(Enum.ReadRxBuffer.RXB1SIDH);
                 }
             }
 
-            if(!readMessage)
+            if(rxBuffer == null)
             {
-                return (readMessage, null);
+                return (false, null);
             }
-
-           
+                       
             RxExtendendedIdentifier8Register? eid8Register = null;
             RxExtendendedIdentifier0Register? eid0Register = null;
 
-            var sidhRegister = new RxStandardIdentifierHighRegister(ReadRegister(sidh));
-            var sidlRegister = new RxStandardIdentifierLowRegister(ReadRegister(sidl));
+            var sidhRegister = new RxStandardIdentifierHighRegister(rxBuffer[0]);
+            var sidlRegister = new RxStandardIdentifierLowRegister(rxBuffer[1]);
 
             if(sidlRegister.IDE)
             {
-                eid8Register = new RxExtendendedIdentifier8Register(ReadRegister(eid8));
-                eid0Register = new RxExtendendedIdentifier0Register(ReadRegister(eid0));
+                eid8Register = new RxExtendendedIdentifier8Register(rxBuffer[2]);
+                eid0Register = new RxExtendendedIdentifier0Register(rxBuffer[3]);
             }
 
-            var dlcRegister = new RxDataLengthCodeRegister(ReadRegister(dlc));
+            var dlcRegister = new RxDataLengthCodeRegister(rxBuffer[4]);
 
             var data = new byte[dlcRegister.DLC];
 
-            spiDevice.TransferSequential(new[] { Commands.READ, rxbd }, data);
+            Array.ConstrainedCopy(rxBuffer, 5, data, 0, dlcRegister.DLC);
 
             return (true, new CanMessage(sidhRegister, sidlRegister, eid8Register, eid0Register, dlcRegister, data));
         }
@@ -444,7 +382,7 @@ namespace CanInterface.MCP2515
 
             return new ReadStatusInstructionResponse(buffer[0]);
         }
-
+                
         /// <summary>
         /// Gets the status instruction response
         /// </summary>
@@ -453,6 +391,66 @@ namespace CanInterface.MCP2515
         {
             return Task.Run(() => ReadStatus());
         }
+
+        /// <summary>
+        /// Read the full or data only buffer
+        /// </summary>
+        /// <param name="location">The location to read from. </param>
+        /// <returns>The data read from the registers. Will read the the registers in sequence:
+        /// SIDH, SIDL, EID8, EID0, DLC, D0-D7</returns>
+        public byte[] ReadRxBuffer(ReadRxBuffer location)
+        {
+            int bufferSize = 12;
+            if(location == Enum.ReadRxBuffer.RXB0DO || location == Enum.ReadRxBuffer.RXB1D0)
+            {
+                bufferSize = 8;
+            }
+
+            byte[] buffer = new byte[bufferSize];
+
+            spiDevice.TransferSequential(new byte[] { (byte)location }, buffer);
+
+            return buffer;
+        }
+
+        /// <summary>
+        /// Read the full or data only buffer
+        /// </summary>
+        /// <param name="location">The location to read from. </param>
+        /// <returns>The data read from the registers. Will read the the registers in sequence:
+        /// SIDH, SIDL, EID8, EID0, DLC, D0-D7</returns>
+        public Task<byte[]> ReadRxBufferAsync(ReadRxBuffer location)
+        {
+            return Task.Run(() => ReadRxBuffer(location));
+        }
+        
+        /// <summary>
+        /// Loads the transmit buffer starting at the address indicated by teh the bufferToLoad 
+        /// </summary>
+        /// <param name="bufferToLoad">The transmit buffer to write to</param>
+        /// <param name="values">the values to write. each byte will be written to the registers in sequence: 
+        /// SIDH, SIDL, EID8, EID0, DLC, D0-D7</param>
+        public void LoadTxBuffer(LoadTxBuffer bufferToLoad, byte[] values)
+        {
+            byte[] buffer = new byte[values.Length + 1];
+
+            buffer[0] = (byte)bufferToLoad;
+            Array.ConstrainedCopy(values, 0, buffer, 1, values.Length);
+
+            spiDevice.Write(buffer);
+        }
+
+        /// <summary>
+        /// Loads the transmit buffer starting at the address indicated by teh the bufferToLoad 
+        /// </summary>
+        /// <param name="bufferToLoad">The transmit buffer to write to</param>
+        /// <param name="values">the values to write. each byte will be written to the registers in sequence: 
+        /// SIDH, SIDL, EID8, EID0, DLC, D0-D7</param>
+        public Task LoadTxBufferAsync(LoadTxBuffer bufferToLoad, byte[] values)
+        {
+            return Task.Run(() => LoadTxBuffer(bufferToLoad, values));
+        }
+
     }
 }
 
