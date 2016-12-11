@@ -10,9 +10,10 @@ namespace CanInterface.MCP2515.BitStructures
     public struct RxDataLengthCodeRegister
     {
         /// <summary>
-        ///  Remote Transmission Request bit
-        /// 1 = Transmitted Message will be a Remote Transmit Request
-        /// 0 = Transmitted Message will be a Data Frame
+        ///   Extended Frame Remote Transmission Request bit
+        ///   (valid only when RXBnSIDL.IDE = ‘1’)
+        ///   1 = Extended Frame Remote Transmit Request Received
+        ///   0 = Extended Data Frame Received
         /// </summary>
         public bool RTR;
         /// <summary>
