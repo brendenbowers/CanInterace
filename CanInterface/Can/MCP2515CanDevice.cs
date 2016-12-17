@@ -13,10 +13,11 @@ namespace CanInterface.Can
     {
         public EventHandler<CanMessageEvent> CanMessageRecieved;
 
-        protected IController Controller = null;
         protected Task ReadTask = null;
-
         protected CancellationTokenSource ReadTaskCancellationToken = null;
+
+        public IController Controller { get; protected set; }
+        public TimeSpan ReadPollingWaitPeriod { get; set; } = TimeSpan.FromMilliseconds(100);
 
         public MCP2515CanDevice(IController controller)
         {
@@ -26,14 +27,16 @@ namespace CanInterface.Can
             }
 
             ReadTaskCancellationToken = new CancellationTokenSource();
-            ReadTask = new Task(ReadWorker, (ReadTaskCancellationToken.Token, controller), ReadTaskCancellationToken.Token, TaskCreationOptions.LongRunning);
+            ReadTask = new Task(ReadWorker, (ReadTaskCancellationToken.Token, controller, ReadPollingWaitPeriod), ReadTaskCancellationToken.Token, TaskCreationOptions.LongRunning);
 
         }
 
 
         protected void ReadWorker(object sync)
         {
-            (CancellationToken token, IController controller) = ((CancellationToken, IController))sync;
+            (CancellationToken token, IController controller, TimeSpan readWaitTime) = ((CancellationToken, IController, TimeSpan))sync;
+
+            var wait = new ManualResetEventSlim(false);
 
             bool read = false;
             CanMessage message = null;
@@ -50,7 +53,15 @@ namespace CanInterface.Can
                 {
                     CanMessageRecieved?.Invoke(this, new CanMessageEvent(message, ReceiveBuffer.RX1));
                 }
+
+                //use a eventwait to sleep as we do not have access to thread.sleep
+                wait.Wait(readWaitTime, token);
             }
+        }
+
+        public Task<bool> Transmit(CanMessage message, TimeSpan? timeout = null)
+        {
+            return Controller.TransmitAsync(message, timeout);
         }
         
         public void Dispose()
