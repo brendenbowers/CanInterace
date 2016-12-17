@@ -12,7 +12,7 @@ using Windows.Devices.Spi;
 
 namespace CanInterface.MCP2515
 {
-    public class Controller
+    public partial class Controller : IController
     {
 
         public TimeSpan ResetDefultTimeout { get; set; } = TimeSpan.FromSeconds(1);
@@ -33,49 +33,39 @@ namespace CanInterface.MCP2515
             });
         }
 
-
-        public async Task Init(BaudRate baudRate)
-        {
-            await Reset();
-            await SetBaudRateAsync(baudRate);
-        }
-
-
         /// <summary>
         /// Resets the device
         /// </summary>
         /// <param name="resetTimeout"></param>
         /// <returns></returns>
-        public Task Reset(TimeSpan? resetTimeout = null)
+        public void Init(BaudRate baudRate, byte frequency, byte syncJumpWidth)
         {
-            return Task.Run(async () => {
-                spiDevice.Write(Commands.RESET);
-
-                var timeOut = DateTime.Now.Add(resetTimeout ?? ResetDefultTimeout);
-
-
-                CanStatusRegister? status = null;
-                while (DateTime.Now < timeOut && status?.OperatingMode != OperatingMode.Configuration)
-                {
-                    status = ReadCanStatus();
-                    await Task.Delay(100);
-                }
-
-                if(status?.OperatingMode != OperatingMode.Configuration)
-                {
-                    throw new TimeoutException($"Controller status did not change to Configuration withing the expected window. Status {status?.OperatingMode}");
-                }
-
-            });
+            Reset();
+            SetBaudRate(baudRate, frequency, syncJumpWidth);
         }
-
+        
         /// <summary>
         /// Resets the device
         /// </summary>
+        /// <param name="resetTimeout"></param>
         /// <returns></returns>
-        public Task<CanStatusRegister> ReadCanStatusAsync()
+        public void Reset(TimeSpan? resetTimeout = null)
         {
-            return Task.Run(() => ReadCanStatus());
+            spiDevice.Write(Commands.RESET);
+
+            var timeOut = DateTime.Now.Add(resetTimeout ?? ResetDefultTimeout);
+
+
+            CanStatusRegister? status = null;
+            while (DateTime.Now < timeOut && status?.OperatingMode != OperatingMode.Configuration)
+            {
+                status = ReadCanStatus();
+            }
+
+            if (status?.OperatingMode != OperatingMode.Configuration)
+            {
+                throw new TimeoutException($"Controller status did not change to Configuration withing the expected window. Status {status?.OperatingMode}");
+            }
         }
 
         /// <summary>
@@ -85,6 +75,15 @@ namespace CanInterface.MCP2515
         public CanStatusRegister ReadCanStatus()
         {
             return ReadRegister(Registers.CANSTAT);
+        }
+
+        /// <summary>
+        /// Reads the interrupt flags from the device
+        /// </summary>
+        /// <returns></returns>
+        public CanInterruptFlagRegister ReadInteruptFlags()
+        {
+            return ReadRegister(Registers.CANINTF);
         }
 
         /// <summary>
@@ -123,7 +122,7 @@ namespace CanInterface.MCP2515
             }
 
             //load the buffer with the data from the can message
-            LoadTxBuffer(txBuffer, message.ToTransmitRegisterBytes());
+            LoadTxBuffer(txBuffer, message);
 
             //tell the controller we are ready to transmit
             WriteRegisterBit(ctrl, Registers.TXREQ, 1);
@@ -154,21 +153,11 @@ namespace CanInterface.MCP2515
             WriteRegisterBit(ctrl, Registers.TXREQ, 0);
 
             //clears the interrupt
-            WriteRegisterBit(intf, intf, 0);
+            WriteRegisterBit(Registers.CANINTF, intf, 0);
 
             return messageSent;
         }
 
-        /// <summary>
-        /// Sends the given message on the first available buffer starting at buffer 0
-        /// </summary>
-        /// <param name="message">The message to send</param>
-        /// <param name="timeout">The timeout </param>
-        /// <returns>True if the message was sent, false if the timeout occured before the message was sent</returns>
-        public Task<bool> TransmitAsync(CanMessage message, TimeSpan? timeout = null)
-        {
-            return Task.Run(() => Transmit(message, timeout));
-        }
 
         /// <summary>
         /// Recieves a message from the given buffer
@@ -179,7 +168,7 @@ namespace CanInterface.MCP2515
         ///     True when read, false if a timeout occured
         ///     The constructed message if one was read, null if not
         /// </returns>
-        public (bool read, CanMessage message) Receive(ReceieveBuffer buffer = ReceieveBuffer.Both, TimeSpan? timeout = null)
+        public (bool read, CanMessage message) Receive(ReceiveBuffer buffer = ReceiveBuffer.Both, TimeSpan? timeout = null)
         {
             var timeoutTime = DateTime.Now.Add(timeout ?? ReceiveDefaultTimeout);
 
@@ -190,12 +179,12 @@ namespace CanInterface.MCP2515
             {
                 CanInterruptFlagRegister interrupts = ReadRegister(Registers.CANINTF);
                 
-                if((buffer == ReceieveBuffer.RX0 || buffer == ReceieveBuffer.Both) && interrupts.RX0IF)
+                if((buffer == ReceiveBuffer.RX0 || buffer == ReceiveBuffer.Both) && interrupts.RX0IF)
                 {
                     isRemote = ((ReceiveBuffer0Control)ReadRegister(Registers.RXB0CTRL)).RXRTR;
                     rxBuffer = ReadRxBuffer(Enum.ReadRxBuffer.RXB0SIDH);
                 }
-                else if((buffer == ReceieveBuffer.RX1 || buffer == ReceieveBuffer.Both) && interrupts.RX1IF)
+                else if((buffer == ReceiveBuffer.RX1 || buffer == ReceiveBuffer.Both) && interrupts.RX1IF)
                 {
                     isRemote = ((ReceiveBuffer1Control)ReadRegister(Registers.RXB1CTRL)).RXRTR;
                     rxBuffer = ReadRxBuffer(Enum.ReadRxBuffer.RXB1SIDH);
@@ -230,38 +219,97 @@ namespace CanInterface.MCP2515
             return (true, new CanMessage(sidhRegister, sidlRegister, eid8Register, eid0Register, dlcRegister, data));
         }
 
-        /// <summary>
-        /// Recieves a message from the given buffer
-        /// </summary>
-        /// <param name="buffer">The buffer to recieve the message from</param>
-        /// <param name="timeout">A timeout to expire the read</param>
-        /// <returns>
-        ///     True when read, false if a timeout occured
-        ///     The constructed message if one was read, null if not
-        /// </returns>
-        public Task<(bool read, CanMessage message)> ReceiveAsync(ReceieveBuffer buffer = ReceieveBuffer.Both, TimeSpan? timeout = null)
+        private bool SetBaudRate(BaudRate baudRate, byte frequency, byte syncJumpWidth)
         {
-            return Task.Run(() => Receive(buffer, timeout));
+            if(baudRate != BaudRate.Auto)
+            {
+                SetBaudRate((int)baudRate, frequency, syncJumpWidth);
+                return true;
+            }
+
+            for (int i = 5; i < 1000; i += 5)
+            {
+                SetBaudRate(i, frequency, syncJumpWidth);
+                Task.Delay(500).Wait();
+                CanInterruptFlagRegister interrupt = ReadRegister(Registers.CANINTF);
+
+                if(!interrupt.MERRF)
+                {
+                    return true;
+                }
+
+            }
+
+            return false;
+
         }
 
         /// <summary>
         /// Sets the baud rate
         /// </summary>
         /// <param name="baudRate"></param>
-        private void SetBaudRate(BaudRate baudRate)
+        private void SetBaudRate(int baudRate, byte frequency, byte syncJumpWidth)
         {
-            WriteRegister(Registers.CNF1, (byte)(((byte)baudRate) & 0b0011_1111));
-            WriteRegister(Registers.CNF2, 0b1011_0001);
-            WriteRegister(Registers.CNF3, 0b0000_0101);
-        }
 
-        /// <summary>
-        /// Sets the baud rate
-        /// </summary>
-        /// <param name="baudRate"></param>
-        private Task SetBaudRateAsync(BaudRate baudRate)
-        {
-            return Task.Run(() => SetBaudRate(baudRate));
+            if(syncJumpWidth < 0)
+            {
+                syncJumpWidth = 0;
+            }
+
+            if(syncJumpWidth > 4)
+            {
+                syncJumpWidth = 4;
+            }
+
+            float nominalBitTime = 1.0f / baudRate * 1000;
+            float timeQuantum = 0f;
+            byte bitRatePrescaler = 0;
+            byte bitTiming = 0;
+            float tempBitTiming = 0f;
+
+            for (bitRatePrescaler = 0; bitRatePrescaler < 8; bitRatePrescaler++)
+            {
+                timeQuantum = 2.0f * (bitRatePrescaler + 1) / frequency;
+                tempBitTiming = nominalBitTime / timeQuantum;
+                if(tempBitTiming <= 25)
+                {
+                    bitTiming = (byte)tempBitTiming;
+                    if(tempBitTiming == 0)
+                    {
+                        break;
+                    }   
+                }
+            }
+
+            byte Spt = (byte)(0.7 * bitTiming);
+            byte PrSeg = (byte)((Spt - 1) / 2);
+            byte PhSeg1 = (byte)(Spt - PrSeg - 1);
+            byte PhSeg2 = (byte)(bitTiming - PhSeg1 - PrSeg - 1);
+
+            if(PrSeg + PhSeg1 < PhSeg2)
+            {
+                throw new InvalidConfigurationException("PRSEG, PHSEG1 and PHSEG2 are out of the expected ranges");
+            }
+
+            if(PhSeg2 <= syncJumpWidth)
+            {
+                throw new InvalidConfigurationException("PHSEG2 is  out of the expected range");
+            }
+
+
+            var cnf1 = new Configuration1Register((SyncronizationJumpWidth)syncJumpWidth, bitRatePrescaler);
+            WriteRegister(Registers.CNF1, cnf1);
+            WriteRegister(Registers.CNF2, new Configuration2Register(true, false, (byte)(PhSeg1 -1), (byte)(PrSeg -1)));
+            WriteRegister(Registers.CNF3, new Configuration3Register(false,false, (byte)(PhSeg2 -1)));
+            WriteRegister(Registers.TXRTSCTRL, new TransmitPinControlAndStatusRegister(false, false, false));
+
+            var readCnf1 = (Configuration1Register)ReadRegister(Registers.CNF1);
+            if(readCnf1 != cnf1)
+            {
+                throw new InvalidConfigurationException("the read configuration did not match the expected configuration at CNF1");
+            }
+
+
         }
 
         /// <summary>
@@ -277,16 +325,6 @@ namespace CanInterface.MCP2515
         }
 
         /// <summary>
-        /// Reads the value at the given register address
-        /// </summary>
-        /// <param name="register">The register address</param>
-        /// <returns>The read value</returns>
-        public Task<byte> ReadRegisterAsync(byte register)
-        {
-            return Task.Run(() => ReadRegister(register));
-        }
-
-        /// <summary>
         /// writes the values at the starting register
         /// </summary>
         /// <param name="register">The register to start writing at</param>
@@ -299,17 +337,7 @@ namespace CanInterface.MCP2515
             Array.ConstrainedCopy(value, 0, toWrite, 2, value.Length);
             spiDevice.Write(toWrite);
         }
-
-        /// <summary>
-        /// writes the values at the starting register
-        /// </summary>
-        /// <param name="register">The register to start writing at</param>
-        /// <param name="value">the bytes to write</param>
-        public Task WriteRegisterAsync(byte register, byte[] value)
-        {
-            return Task.Run(() => WriteRegister(register, value));
-        }
-
+        
         /// <summary>
         /// Writes the given value to the specified register
         /// </summary>
@@ -318,16 +346,6 @@ namespace CanInterface.MCP2515
         public void WriteRegister(byte register, byte value)
         {
             spiDevice.Write(Commands.WRITE, register, value);
-        }
-
-        /// <summary>
-        /// Writes the given value to the specified register
-        /// </summary>
-        /// <param name="register">The register to write to</param>
-        /// <param name="value">The value to write</param>
-        public Task WriteRegisterAsync(byte register, byte value)
-        {
-            return Task.Run(() => WriteRegister(register, value));
         }
 
         /// <summary>
@@ -342,17 +360,6 @@ namespace CanInterface.MCP2515
         }
 
         /// <summary>
-        /// Sets the given bit of the given register  to the value specified
-        /// </summary>
-        /// <param name="register">The register to modify</param>
-        /// <param name="bitNumber">The bit to modify</param>
-        /// <param name="value">The value to set the bit to</param>
-        public Task WriteRegisterBitAsync(byte register, byte bitNumber, byte value)
-        {
-            return Task.Run(() => WriteRegisterBit(register, bitNumber, value));
-        }
-
-        /// <summary>
         /// sends the request to send command
         /// </summary>
         /// <param name="transmit2">Send the tx0 buffer</param>
@@ -361,17 +368,6 @@ namespace CanInterface.MCP2515
         public void RequestToSend(bool transmit2, bool transmit1, bool transmit0)
         {
             spiDevice.Write(Commands.RTS.Set(2, transmit2).Set(1, transmit1).Set(0, transmit0));
-        }
-
-        /// <summary>
-        /// sends the request to send command
-        /// </summary>
-        /// <param name="transmit2">Send the tx0 buffer</param>
-        /// <param name="transmit1">Send the tx1 buffer</param>
-        /// <param name="transmit0">Send the tx2 buffer</param>
-        public Task RequestToSendAsync(bool transmit2, bool transmit1, bool transmit0)
-        {
-            return Task.Run(() => RequestToSend(transmit2, transmit1, transmit0));
         }
 
         /// <summary>
@@ -384,15 +380,6 @@ namespace CanInterface.MCP2515
             spiDevice.TransferSequential(new byte[] { Commands.READ_STATUS }, buffer);
 
             return buffer[0];
-        }
-                
-        /// <summary>
-        /// Gets the status instruction response
-        /// </summary>
-        /// <returns>The status response</returns>
-        public Task<ReadStatusInstructionResponse> ReadStatusAsync()
-        {
-            return Task.Run(() => ReadStatus());
         }
 
         /// <summary>
@@ -417,17 +404,6 @@ namespace CanInterface.MCP2515
         }
 
         /// <summary>
-        /// Read the full or data only buffer
-        /// </summary>
-        /// <param name="location">The location to read from. </param>
-        /// <returns>The data read from the registers. Will read the the registers in sequence:
-        /// SIDH, SIDL, EID8, EID0, DLC, D0-D7</returns>
-        public Task<byte[]> ReadRxBufferAsync(ReadRxBuffer location)
-        {
-            return Task.Run(() => ReadRxBuffer(location));
-        }
-        
-        /// <summary>
         /// Loads the transmit buffer starting at the address indicated by teh the bufferToLoad 
         /// </summary>
         /// <param name="bufferToLoad">The transmit buffer to write to</param>
@@ -442,27 +418,23 @@ namespace CanInterface.MCP2515
 
             spiDevice.Write(buffer);
         }
-
+                
         /// <summary>
-        /// Loads the transmit buffer starting at the address indicated by teh the bufferToLoad 
+        /// 
         /// </summary>
-        /// <param name="bufferToLoad">The transmit buffer to write to</param>
-        /// <param name="values">the values to write. each byte will be written to the registers in sequence: 
-        /// SIDH, SIDL, EID8, EID0, DLC, D0-D7</param>
-        public Task LoadTxBufferAsync(LoadTxBuffer bufferToLoad, byte[] values)
-        {
-            return Task.Run(() => LoadTxBuffer(bufferToLoad, values));
-        }
-
+        /// <param name="mode"></param>
+        /// <param name="rx0BufferMode"></param>
+        /// <param name="rx1BufferMode"></param>
+        /// <param name="rollOverBuffer0To1"></param>
         public void SetOperatingMode(OperatingMode mode, ReceiveBufferOperatingMode rx0BufferMode, ReceiveBufferOperatingMode rx1BufferMode, bool rollOverBuffer0To1)
         {
             var current = new CanControlRegister(ReadRegister(Registers.CANCTRL));
 
             var newOperatingMode = new CanControlRegister(mode, current.ABAT, current.OSM, current.CLKEN, current.CLKPRE);
 
-            WriteRegister(Registers.CANCTRL, newOperatingMode.ToByte());
+            WriteRegister(Registers.CANCTRL, newOperatingMode);
 
-            var status = new CanStatusRegister(ReadRegister(Registers.CANSTAT));
+            CanStatusRegister status = ReadRegister(Registers.CANSTAT);
 
             if(status.OperatingMode != newOperatingMode.REQOP)
             {

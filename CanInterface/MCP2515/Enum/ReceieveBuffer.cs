@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CanInterface.MCP2515.Enum
 {
-    public enum ReceieveBuffer
+    public enum ReceiveBuffer
     {
         Both = 0,
         RX0 = 1,

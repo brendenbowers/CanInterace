@@ -107,6 +107,8 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Can\CanMessageEvent.cs" />
+    <Compile Include="Can\MCP2515CanDevice.cs" />
     <Compile Include="Extensions\ByteExtensions.cs" />
     <Compile Include="Extensions\SpiDeviceExtensions.cs" />
     <Compile Include="MCP2515\BitStructures\RxDataLengthCodeRegister.cs" />
@@ -131,7 +133,8 @@
     <Compile Include="MCP2515\BitStructures\RxStandardIdentifierLowRegister.cs" />
     <Compile Include="MCP2515\BitStructures\TxStandardIdentifierLowRegister.cs" />
     <Compile Include="MCP2515\BitStructures\TransmitBufferControlRegister.cs" />
-    <Compile Include="MCP2515\BitStructures\TransmitRequestToSendControlRegister.cs" />
+    <Compile Include="MCP2515\BitStructures\TransmitPinControlAndStatusRegister.cs" />
+    <Compile Include="MCP2515\Controller.Async.cs" />
     <Compile Include="MCP2515\Enum\BufferType.cs" />
     <Compile Include="MCP2515\Enum\ClockOutPrescaler.cs" />
     <Compile Include="MCP2515\Enum\FilterMatch.cs" />
@@ -152,8 +155,10 @@
     <Compile Include="MCP2515\Enum\OperatingMode.cs" />
     <Compile Include="MCP2515\Enum\SyncronizationJumpWidth.cs" />
     <Compile Include="MCP2515\Enum\TransmitBufferPriority.cs" />
+    <Compile Include="MCP2515\Exceptions\InvalidConfigurationException.cs" />
     <Compile Include="MCP2515\Exceptions\InvalidOperatingModeExcpetion.cs" />
     <Compile Include="MCP2515\Exceptions\NoAvailableBuffersException.cs" />
+    <Compile Include="MCP2515\IController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\CanInterface.rd.xml" />
   </ItemGroup>

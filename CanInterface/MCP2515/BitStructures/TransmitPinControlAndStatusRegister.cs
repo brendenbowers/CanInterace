@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CanInterface.MCP2515.BitStructures
 {
-    public struct TransmitRequestToSendControlRegister
+    public struct TransmitPinControlAndStatusRegister
     {
         /// <summary>
         /// TX2RTS Pin State bit
@@ -47,7 +47,7 @@ namespace CanInterface.MCP2515.BitStructures
         public bool B0RTSM;
 
 
-        public TransmitRequestToSendControlRegister(byte value)
+        public TransmitPinControlAndStatusRegister(byte value)
         {
             B2RTS = value.GetBit(5);
             B1RTS = value.GetBit(4);
@@ -57,7 +57,7 @@ namespace CanInterface.MCP2515.BitStructures
             B0RTSM = value.GetBit(0);
         }
 
-        public TransmitRequestToSendControlRegister(bool b2rtsm, bool b1rtsm, bool b0rtsm)
+        public TransmitPinControlAndStatusRegister(bool b2rtsm, bool b1rtsm, bool b0rtsm)
         {
             B2RTS = false;
             B1RTS = false;
@@ -72,14 +72,14 @@ namespace CanInterface.MCP2515.BitStructures
             return ((byte)(0b0000_0000)).SetBits(false, false, false, false, false, B2RTSM, B1RTSM, B0RTSM);
         }
 
-        public static implicit operator byte(TransmitRequestToSendControlRegister register)
+        public static implicit operator byte(TransmitPinControlAndStatusRegister register)
         {
             return register.ToByte();
         }
 
-        public static implicit operator TransmitRequestToSendControlRegister(byte register)
+        public static implicit operator TransmitPinControlAndStatusRegister(byte register)
         {
-            return new TransmitRequestToSendControlRegister(register);
+            return new TransmitPinControlAndStatusRegister(register);
         }
     }
 }

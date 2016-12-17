@@ -8,6 +8,7 @@ namespace CanInterface.MCP2515.Enum
 {
     public enum BaudRate : byte
     {
+        Auto = 0,
         Can10K = 1,
         Can50K = 2,
         Can100K = 3,

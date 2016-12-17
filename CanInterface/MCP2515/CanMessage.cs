@@ -65,5 +65,7 @@ namespace CanInterface.MCP2515
 
             return buffer;
         }
+
+        public static implicit operator byte[](CanMessage message) => message.ToTransmitRegisterBytes();
     }
 }
