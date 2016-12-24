@@ -49,6 +49,8 @@
   <ItemGroup>
     <Compile Include="MCP2515\BitStructures\CanControlRegisterTests.cs" />
     <Compile Include="MCP2515\BitStructures\CanInterruptEnableRegisterTests.cs" />
+    <Compile Include="MCP2515\BitStructures\CanInterruptFlagRegisterTests.cs" />
+    <Compile Include="MCP2515\BitStructures\CanStatusRegisterTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
