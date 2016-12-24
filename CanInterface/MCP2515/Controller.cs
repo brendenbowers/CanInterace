@@ -7,8 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Windows.Devices.Gpio;
-using Windows.Devices.Spi;
 
 namespace CanInterface.MCP2515
 {
@@ -20,17 +18,17 @@ namespace CanInterface.MCP2515
         public TimeSpan ReceiveDefaultTimeout { get; set; } = TimeSpan.FromSeconds(1);
 
 
-        protected SpiDevice spiDevice = null;
+        protected Spi.ISpiDevice SpiDevice = null;
 
 
-        public Controller(SpiController contoller, int csPin)
+        public Controller(Spi.ISpiDevice device)
         {
-            spiDevice = contoller.GetDevice(new SpiConnectionSettings(csPin)
+            if(device == null)
             {
-                Mode = SpiMode.Mode0,
-                DataBitLength = 8,
-                SharingMode = SpiSharingMode.Exclusive
-            });
+                throw new ArgumentNullException(nameof(device));
+            }
+
+            SpiDevice = device;
         }
 
         /// <summary>
@@ -51,7 +49,7 @@ namespace CanInterface.MCP2515
         /// <returns></returns>
         public void Reset(TimeSpan? resetTimeout = null)
         {
-            spiDevice.Write(Commands.RESET);
+            SpiDevice.Write(Commands.RESET);
 
             var timeOut = DateTime.Now.Add(resetTimeout ?? ResetDefultTimeout);
 
@@ -320,7 +318,7 @@ namespace CanInterface.MCP2515
         public byte ReadRegister(byte register)
         {
             var readBuffer = new byte[1];
-            spiDevice.TransferSequential(new[] { Commands.READ, register }, readBuffer);
+            SpiDevice.TransferSequential(new[] { Commands.READ, register }, readBuffer);
             return readBuffer[0];
         }
 
@@ -335,7 +333,7 @@ namespace CanInterface.MCP2515
             toWrite[0] = Commands.WRITE;
             toWrite[1] = register;
             Array.ConstrainedCopy(value, 0, toWrite, 2, value.Length);
-            spiDevice.Write(toWrite);
+            SpiDevice.Write(toWrite);
         }
         
         /// <summary>
@@ -345,7 +343,7 @@ namespace CanInterface.MCP2515
         /// <param name="value">The value to write</param>
         public void WriteRegister(byte register, byte value)
         {
-            spiDevice.Write(Commands.WRITE, register, value);
+            SpiDevice.Write(Commands.WRITE, register, value);
         }
 
         /// <summary>
@@ -356,7 +354,7 @@ namespace CanInterface.MCP2515
         /// <param name="value">The value to set the bit to</param>
         public void WriteRegisterBit(byte register, byte bitNumber, byte value)
         {
-            spiDevice.Write(Commands.BIT_MODIFY, register, ((byte)(1 << bitNumber)), (byte)(value == 0 ? 0b0000_0000 : 0b1111_1111));
+            SpiDevice.Write(Commands.BIT_MODIFY, register, ((byte)(1 << bitNumber)), (byte)(value == 0 ? 0b0000_0000 : 0b1111_1111));
         }
 
         /// <summary>
@@ -367,7 +365,7 @@ namespace CanInterface.MCP2515
         /// <param name="transmit0">Send the tx2 buffer</param>
         public void RequestToSend(bool transmit2, bool transmit1, bool transmit0)
         {
-            spiDevice.Write(Commands.RTS.Set(2, transmit2).Set(1, transmit1).Set(0, transmit0));
+            SpiDevice.Write(Commands.RTS.Set(2, transmit2).Set(1, transmit1).Set(0, transmit0));
         }
 
         /// <summary>
@@ -377,7 +375,7 @@ namespace CanInterface.MCP2515
         public ReadStatusInstructionResponse ReadStatus()
         {
             var buffer = new byte[1];
-            spiDevice.TransferSequential(new byte[] { Commands.READ_STATUS }, buffer);
+            SpiDevice.TransferSequential(new byte[] { Commands.READ_STATUS }, buffer);
 
             return buffer[0];
         }
@@ -398,7 +396,7 @@ namespace CanInterface.MCP2515
 
             byte[] buffer = new byte[bufferSize];
 
-            spiDevice.TransferSequential(new byte[] { (byte)location }, buffer);
+            SpiDevice.TransferSequential(new byte[] { (byte)location }, buffer);
 
             return buffer;
         }
@@ -416,7 +414,7 @@ namespace CanInterface.MCP2515
             buffer[0] = (byte)bufferToLoad;
             Array.ConstrainedCopy(values, 0, buffer, 1, values.Length);
 
-            spiDevice.Write(buffer);
+            SpiDevice.Write(buffer);
         }
                 
         /// <summary>
