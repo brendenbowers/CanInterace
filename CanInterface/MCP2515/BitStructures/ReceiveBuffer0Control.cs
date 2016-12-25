@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CanInterface.MCP2515.BitStructures
 {
-    public struct ReceiveBuffer0Control
+    public struct ReceiveBuffer0ControlRegister
     {
         /// <summary>
         /// RXM: Receive Buffer Operating Mode bits
@@ -45,7 +45,7 @@ namespace CanInterface.MCP2515.BitStructures
         /// </summary>
         public bool FILHIT;
 
-        public ReceiveBuffer0Control(byte value)
+        public ReceiveBuffer0ControlRegister(byte value)
         {
             RXM = (ReceiveBufferOperatingMode)(value & (byte)ReceiveBufferOperatingMode.MASK);
             RXRTR = value.GetBit(3);
@@ -54,7 +54,7 @@ namespace CanInterface.MCP2515.BitStructures
             FILHIT = value.GetBit(0);
         }
 
-        public ReceiveBuffer0Control(ReceiveBufferOperatingMode rxm, bool bukt)
+        public ReceiveBuffer0ControlRegister(ReceiveBufferOperatingMode rxm, bool bukt)
         {
             RXM = rxm;
             RXRTR = false;
@@ -68,14 +68,14 @@ namespace CanInterface.MCP2515.BitStructures
             return ((byte)RXM).Set(2, BUKT);
         }
         
-        public static implicit operator byte(ReceiveBuffer0Control register)
+        public static implicit operator byte(ReceiveBuffer0ControlRegister register)
         {
             return register.ToByte();
         }
 
-        public static implicit operator ReceiveBuffer0Control(byte register)
+        public static implicit operator ReceiveBuffer0ControlRegister(byte register)
         {
-            return new ReceiveBuffer0Control(register);
+            return new ReceiveBuffer0ControlRegister(register);
         }
     }
 }

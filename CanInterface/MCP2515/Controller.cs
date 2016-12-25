@@ -179,7 +179,7 @@ namespace CanInterface.MCP2515
                 
                 if((buffer == ReceiveBuffer.RX0 || buffer == ReceiveBuffer.Both) && interrupts.RX0IF)
                 {
-                    isRemote = ((ReceiveBuffer0Control)ReadRegister(Registers.RXB0CTRL)).RXRTR;
+                    isRemote = ((ReceiveBuffer0ControlRegister)ReadRegister(Registers.RXB0CTRL)).RXRTR;
                     rxBuffer = ReadRxBuffer(Enum.ReadRxBuffer.RXB0SIDH);
                 }
                 else if((buffer == ReceiveBuffer.RX1 || buffer == ReceiveBuffer.Both) && interrupts.RX1IF)
@@ -439,7 +439,7 @@ namespace CanInterface.MCP2515
                 throw new InvalidOperatingModeExcpetion(newOperatingMode.REQOP, status.OperatingMode);
             }
 
-            WriteRegister(Registers.RXB0CTRL, new ReceiveBuffer0Control(rx0BufferMode, rollOverBuffer0To1));
+            WriteRegister(Registers.RXB0CTRL, new ReceiveBuffer0ControlRegister(rx0BufferMode, rollOverBuffer0To1));
             WriteRegister(Registers.RXB1CTRL, new ReceiveBuffer1Control(rx1BufferMode));
         }
 
