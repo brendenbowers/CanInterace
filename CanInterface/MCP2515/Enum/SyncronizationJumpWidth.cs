@@ -9,7 +9,7 @@ namespace CanInterface.MCP2515.Enum
     [Flags]
     public enum SyncronizationJumpWidth : byte
     {
-        MASK = 0b1100_1000,
+        MASK = 0b1100_0000,
 
         FourXTQ = 0b1100_0000,
         ThreeXTQ = 0b1000_0000,

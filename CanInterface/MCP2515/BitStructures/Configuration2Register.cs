@@ -36,7 +36,7 @@ namespace CanInterface.MCP2515.BitStructures
         {
             BTLMODE = value.GetBit(7);
             SAM = value.GetBit(6);
-            PHSEG1 = (byte)(value & 0b0011_1000);
+            PHSEG1 = (byte)((value & 0b0011_1000) >> 3) ;
             PRSEG = (byte)(value & 0b0000_0111);
         }
 
@@ -44,15 +44,15 @@ namespace CanInterface.MCP2515.BitStructures
         {
             BTLMODE = btlmode;
             SAM = sam;
-            PHSEG1 = (byte)(phseg1 & 0b0011_1000);
-            PRSEG = (byte)(prseg & 0b0000_0111);
+            PHSEG1 = phseg1;
+            PRSEG = prseg;
         }
 
         public byte ToByte()
         {
             byte value = 0b0000_0000;
             value = value.Set(7, BTLMODE).Set(6, SAM);
-            value |= PHSEG1;
+            value |= (byte)(PHSEG1 << 3);
             value |= PRSEG;
             return value;
         }

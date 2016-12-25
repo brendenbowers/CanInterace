@@ -51,6 +51,11 @@
     <Compile Include="MCP2515\BitStructures\CanInterruptEnableRegisterTests.cs" />
     <Compile Include="MCP2515\BitStructures\CanInterruptFlagRegisterTests.cs" />
     <Compile Include="MCP2515\BitStructures\CanStatusRegisterTest.cs" />
+    <Compile Include="MCP2515\BitStructures\Configuration1RegisterTests.cs" />
+    <Compile Include="MCP2515\BitStructures\Configuration2RegisterTests.cs" />
+    <Compile Include="MCP2515\BitStructures\Configuration3RegisterTests.cs" />
+    <Compile Include="MCP2515\BitStructures\ErrorFlagRegisterTests.cs" />
+    <Compile Include="MCP2515\BitStructures\ReadStatusInstructionResponseTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
