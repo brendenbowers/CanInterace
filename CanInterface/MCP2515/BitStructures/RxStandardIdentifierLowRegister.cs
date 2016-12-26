@@ -16,7 +16,8 @@ namespace CanInterface.MCP2515.BitStructures
         /// <summary>
         /// Standard Frame Remote Transmit Request bit (valid only if IDE bit = ‘0’)
         /// 1 = Standard Frame Remote Transmit Request Received
-        /// 0 = Standard Data Frame Received        /// </summary>
+        /// 0 = Standard Data Frame Received
+        /// </summary>
         public bool SRR;
         /// <summary>
         /// Extended Identifier Flag bit
@@ -36,17 +37,6 @@ namespace CanInterface.MCP2515.BitStructures
             SRR = value.GetBit(4);
             IDE = value.GetBit(3);
             EID = (byte)(value & 0b0000_0011);
-        }
-
-        public byte ToByte()
-        {
-            return ((byte)(SIDL | EID)).Set(3, IDE);
-        }
-
-
-        public static implicit operator byte(RxStandardIdentifierLowRegister register)
-        {
-            return register.ToByte();
         }
 
         public static implicit operator RxStandardIdentifierLowRegister(byte register)

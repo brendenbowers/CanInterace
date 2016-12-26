@@ -58,6 +58,13 @@
     <Compile Include="MCP2515\BitStructures\ReadStatusInstructionResponseTests.cs" />
     <Compile Include="MCP2515\BitStructures\ReceiveBuffer0ControlRegisterTests.cs" />
     <Compile Include="MCP2515\BitStructures\ReceiveBuffer1ControlRegisterTests.cs" />
+    <Compile Include="MCP2515\BitStructures\ReceiveBufferPinControlAndStatusRegisterTests.cs" />
+    <Compile Include="MCP2515\BitStructures\RxDataLengthCodeRegisterTests.cs" />
+    <Compile Include="MCP2515\BitStructures\RxExtendendedIdentifier0RegisterTests.cs" />
+    <Compile Include="MCP2515\BitStructures\RxExtendendedIdentifier8RegisterTests.cs" />
+    <Compile Include="MCP2515\BitStructures\RxStandardIdentifierHighRegisterTests.cs" />
+    <Compile Include="MCP2515\BitStructures\RxStandardIdentifierLowRegisterTests.cs" />
+    <Compile Include="MCP2515\BitStructures\RxStatusInstructionResponseTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

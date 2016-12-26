@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CanInterface.MCP2515.BitStructures
 {
-    public struct ReceiveBufferFullPinControlAndStatusRegister
+    public struct ReceiveBufferPinControlAndStatusRegister
     {
         /// <summary>
         /// RX1BF Pin State bit (Digital Output mode only)
@@ -45,17 +45,12 @@ namespace CanInterface.MCP2515.BitStructures
         public bool B0BFM;
 
 
-        public ReceiveBufferFullPinControlAndStatusRegister(byte value)
+        public ReceiveBufferPinControlAndStatusRegister(byte value)
         {
-            B1BFS = value.GetBit(5);
-            B0BFS = value.GetBit(4);
-            B1BFE = value.GetBit(3);
-            B0BFE = value.GetBit(2);
-            B1BFM = value.GetBit(1);
-            B0BFM = value.GetBit(0);
+            (_, _, B1BFS, B0BFS, B1BFE, B0BFE, B1BFM, B0BFM) = value.GetBits();
         }
 
-        public ReceiveBufferFullPinControlAndStatusRegister(bool b1bfs, bool b0bfs, bool b1bfe, bool b0bfe, bool b1bfm, bool b0bfm)
+        public ReceiveBufferPinControlAndStatusRegister(bool b1bfs, bool b0bfs, bool b1bfe, bool b0bfe, bool b1bfm, bool b0bfm)
         {
             B1BFS = b1bfs;
             B0BFS = b0bfs;
@@ -70,14 +65,14 @@ namespace CanInterface.MCP2515.BitStructures
             return ((byte)(0b0000_0000)).SetBits(false, false, B1BFS, B0BFS, B1BFE, B0BFE, B1BFM, B0BFM);
         }
 
-        public static implicit operator byte(ReceiveBufferFullPinControlAndStatusRegister register)
+        public static implicit operator byte(ReceiveBufferPinControlAndStatusRegister register)
         {
             return register.ToByte();
         }
 
-        public static implicit operator ReceiveBufferFullPinControlAndStatusRegister(byte register)
+        public static implicit operator ReceiveBufferPinControlAndStatusRegister(byte register)
         {
-            return new ReceiveBufferFullPinControlAndStatusRegister(register);
+            return new ReceiveBufferPinControlAndStatusRegister(register);
         }
     }
 }
