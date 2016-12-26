@@ -56,7 +56,8 @@
     <Compile Include="MCP2515\BitStructures\Configuration3RegisterTests.cs" />
     <Compile Include="MCP2515\BitStructures\ErrorFlagRegisterTests.cs" />
     <Compile Include="MCP2515\BitStructures\ReadStatusInstructionResponseTests.cs" />
-    <Compile Include="MCP2515\BitStructures\ReceiveBuffer0ControlTests.cs" />
+    <Compile Include="MCP2515\BitStructures\ReceiveBuffer0ControlRegisterTests.cs" />
+    <Compile Include="MCP2515\BitStructures\ReceiveBuffer1ControlRegisterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

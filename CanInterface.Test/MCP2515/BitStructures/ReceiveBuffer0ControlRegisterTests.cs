@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace CanInterface.Test.MCP2515.BitStructures
 {
     [TestFixture(Category = "Unit Test")]
-    public class ReceiveBuffer0ControlTests
+    public class ReceiveBuffer0ControlRegisterTests
     {
         public static IEnumerable<TestCaseData> ByteConstructorTestSource
         {
@@ -27,8 +27,10 @@ namespace CanInterface.Test.MCP2515.BitStructures
                 yield return new TestCaseData((byte)0b0110_0000, ReceiveBufferOperatingMode.AcceptAll, false, false, false, false)
                     .SetName("ReceiveBuffer0ControlRegister - Byte Constructor - AcceptAll, false, false, false, false");
 
-                yield return new TestCaseData((byte)0b1111_1111, ReceiveBufferOperatingMode.AcceptAll, true, true, true, true)
+                yield return new TestCaseData((byte)0b1110_1111, ReceiveBufferOperatingMode.AcceptAll, true, true, true, true)
                     .SetName("ReceiveBuffer0ControlRegister - Byte Constructor - Bit 7 Set");
+                yield return new TestCaseData((byte)0b0111_1111, ReceiveBufferOperatingMode.AcceptAll, true, true, true, true)
+                    .SetName("ReceiveBuffer0ControlRegister - Byte Constructor - Bit 4 Set");
 
             }
         }

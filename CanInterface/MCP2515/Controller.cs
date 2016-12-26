@@ -184,7 +184,7 @@ namespace CanInterface.MCP2515
                 }
                 else if((buffer == ReceiveBuffer.RX1 || buffer == ReceiveBuffer.Both) && interrupts.RX1IF)
                 {
-                    isRemote = ((ReceiveBuffer1Control)ReadRegister(Registers.RXB1CTRL)).RXRTR;
+                    isRemote = ((ReceiveBuffer1ControlRegister)ReadRegister(Registers.RXB1CTRL)).RXRTR;
                     rxBuffer = ReadRxBuffer(Enum.ReadRxBuffer.RXB1SIDH);
                 }
             }
@@ -440,7 +440,7 @@ namespace CanInterface.MCP2515
             }
 
             WriteRegister(Registers.RXB0CTRL, new ReceiveBuffer0ControlRegister(rx0BufferMode, rollOverBuffer0To1));
-            WriteRegister(Registers.RXB1CTRL, new ReceiveBuffer1Control(rx1BufferMode));
+            WriteRegister(Registers.RXB1CTRL, new ReceiveBuffer1ControlRegister(rx1BufferMode));
         }
 
 
