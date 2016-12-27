@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace CanInterface.Test.MCP2515.BitStructures
 {
     [TestFixture(Category = "Unit Test")]
-    public class CanStatusRegisterTest
+    public class CanStatusRegisterTests
     {
 
         public static IEnumerable<TestCaseData> ByteConstructorTestSource
