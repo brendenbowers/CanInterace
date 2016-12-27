@@ -13,7 +13,7 @@ namespace CanInterface.MCP2515.BitStructures
         /// </summary>
         public byte EID;
 
-        public TxExtendendedIdentifier0Register(byte value)
+        public  TxExtendendedIdentifier0Register(byte value)
         {
             EID = value;
         }

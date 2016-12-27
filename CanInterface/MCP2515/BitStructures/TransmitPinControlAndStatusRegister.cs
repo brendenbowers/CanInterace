@@ -49,12 +49,7 @@ namespace CanInterface.MCP2515.BitStructures
 
         public TransmitPinControlAndStatusRegister(byte value)
         {
-            B2RTS = value.GetBit(5);
-            B1RTS = value.GetBit(4);
-            B0RTS = value.GetBit(3);
-            B2RTSM = value.GetBit(2);
-            B1RTSM = value.GetBit(1);
-            B0RTSM = value.GetBit(0);
+            (_,_, B2RTS, B1RTS, B0RTS, B2RTSM, B1RTSM, B0RTSM) = value.GetBits();
         }
 
         public TransmitPinControlAndStatusRegister(bool b2rtsm, bool b1rtsm, bool b0rtsm)
