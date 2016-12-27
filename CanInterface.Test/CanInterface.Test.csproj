@@ -69,6 +69,9 @@
     <Compile Include="MCP2515\BitStructures\TransmitPinControlAndStatusRegisterTests.cs" />
     <Compile Include="MCP2515\BitStructures\TxDataLengthCodeRegisterTests.cs" />
     <Compile Include="MCP2515\BitStructures\TxExtendendedIdentifier0RegisterTests.cs" />
+    <Compile Include="MCP2515\BitStructures\TxExtendendedIdentifier8RegisterTests.cs" />
+    <Compile Include="MCP2515\BitStructures\TxStandardIdentifierHighRegisterTests.cs" />
+    <Compile Include="MCP2515\BitStructures\TxStandardIdentifierLowRegisterTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

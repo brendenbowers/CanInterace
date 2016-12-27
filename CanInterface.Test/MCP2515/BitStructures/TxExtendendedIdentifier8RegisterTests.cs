@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace CanInterface.Test.MCP2515.BitStructures
 {
     [TestFixture(Category = "Unit Test")]
-    public class TxExtendendedIdentifier0RegisterTests
+    public class TxExtendendedIdentifier8RegisterTests
     {
         public static IEnumerable<TestCaseData> ByteConstructorTestSource
         {
@@ -25,7 +25,7 @@ namespace CanInterface.Test.MCP2515.BitStructures
         [TestCaseSource(nameof(ByteConstructorTestSource))]
         public void ByteConstructorTest(byte value, byte eid)
         {
-            var register = new TxExtendendedIdentifier0Register(value);
+            var register = new TxExtendendedIdentifier8Register(value);
             Assert.That(register.EID, Is.EqualTo(eid));
         }
 
@@ -33,17 +33,15 @@ namespace CanInterface.Test.MCP2515.BitStructures
         {
             get
             {
-                yield return new TestCaseData((byte)0b1010_1010, (uint)2863311530)
-                    .SetName("TxExtendendedIdentifier0Register - UInt Constructor - 2863311530");
-                yield return new TestCaseData((byte)0b0000_0000, (uint)2863311360)
-                    .SetName("TxExtendendedIdentifier0Register - UInt Constructor - 2863311360");
+                yield return new TestCaseData((byte)0b0000_0001, (uint)4274520375)
+                    .SetName("TxExtendendedIdentifier0Register - UInt Constructor - 4274520375");
             }
         }
 
         [TestCaseSource(nameof(IdConstructorTestSource))]
         public void UIntConstructorTest(byte value, uint id)
         {
-            var register = new TxExtendendedIdentifier0Register(id);
+            var register = new TxExtendendedIdentifier8Register(id);
             Assert.That(register.EID, Is.EqualTo(value));
         }
     }
