@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace CanInterface.Can
 {
+    /// <summary>
+    /// Manages the Controller to recieve messages by polling the controller
+    /// </summary>
     public class MCP2515CanDevice : IDisposable
     {
         /// <summary>
