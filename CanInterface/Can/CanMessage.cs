@@ -10,12 +10,32 @@ namespace CanInterface.MCP2515
     public class CanMessage
     {
         private const int CANID_11BITS = 0x7FF;
-
+        /// <summary>
+        /// The id of the message
+        /// </summary>
         public uint CanId { get; set; }
+        /// <summary>
+        /// If the message is extended
+        /// </summary>
         public bool IsExtended => CanId > CANID_11BITS;
-        public bool IsRemote;
+        /// <summary>
+        /// If the message is a remote frame
+        /// </summary>
+        public bool IsRemote { get; set; }
+        /// <summary>
+        /// The data bytes of the message
+        /// </summary>
         public byte[] Data { get; set; } = new byte[8];
 
+        /// <summary>
+        /// Creates a new can message from the SIDH, SIDL, EID8, EID0, and DLC registers with the given byte array data
+        /// </summary>
+        /// <param name="sidh">The SIDH register</param>
+        /// <param name="sidl">The SIDL register</param>
+        /// <param name="eid8">The EID8 register</param>
+        /// <param name="eid0">The EID0 register</param>
+        /// <param name="dlc">The DLC register</param>
+        /// <param name="data">The data bytes</param>
         public CanMessage(RxStandardIdentifierHighRegister sidh, RxStandardIdentifierLowRegister sidl, RxExtendendedIdentifier8Register? eid8, 
             RxExtendendedIdentifier0Register? eid0, RxDataLengthCodeRegister dlc, byte[] data)
         {
@@ -50,6 +70,10 @@ namespace CanInterface.MCP2515
                 new TxExtendendedIdentifier0Register(CanId), new TxDataLengthCodeRegister(IsRemote, Convert.ToByte(Data.Length)), Data);
         }
         
+        /// <summary>
+        /// Converts the message to a byte array that can be transmitted
+        /// </summary>
+        /// <returns></returns>
         public byte[] ToTransmitRegisterBytes()
         {
             var registers = ToTransmitRegisters();

@@ -11,14 +11,27 @@ namespace CanInterface.Can
 {
     public class MCP2515CanDevice : IDisposable
     {
+        /// <summary>
+        /// Invoked when a message is read from the controller
+        /// </summary>
         public EventHandler<CanMessageEvent> CanMessageRecieved;
 
         protected Task ReadTask = null;
         protected CancellationTokenSource ReadTaskCancellationToken = null;
 
+        /// <summary>
+        /// The controller used to communicate with the can network
+        /// </summary>
         public IController Controller { get; protected set; }
+        /// <summary>
+        /// The amount of time to wait betweem polling for read messages (Default: 100 ms).
+        /// </summary>
         public TimeSpan ReadPollingWaitPeriod { get; set; } = TimeSpan.FromMilliseconds(100);
 
+        /// <summary>
+        /// Creates an instance of the <see cref="MCP2515CanDevice"/>
+        /// </summary>
+        /// <param name="controller">The controller to communicate with</param>
         public MCP2515CanDevice(IController controller)
         {
             if(controller == null)
@@ -28,9 +41,12 @@ namespace CanInterface.Can
 
             ReadTaskCancellationToken = new CancellationTokenSource();
             ReadTask = new Task(ReadWorker, (ReadTaskCancellationToken.Token, controller, ReadPollingWaitPeriod), ReadTaskCancellationToken.Token, TaskCreationOptions.LongRunning);
-
         }
 
+        /// <summary>
+        /// Start polling to receive data from the controller
+        /// </summary>
+        public void StartReceiving() => ReadTask.Start();
 
         protected void ReadWorker(object sync)
         {
@@ -54,8 +70,16 @@ namespace CanInterface.Can
                     CanMessageRecieved?.Invoke(this, new CanMessageEvent(message, ReceiveBuffer.RX1));
                 }
 
-                //use a eventwait to sleep as we do not have access to thread.sleep
-                wait.Wait(readWaitTime, token);
+                try
+                {
+                    //use a eventwait to sleep as we do not have access to thread.sleep
+                    wait.Wait(readWaitTime, token);
+                }
+                catch(OperationCanceledException)
+                { 
+                    //do nothing
+                }
+                
             }
         }
 
