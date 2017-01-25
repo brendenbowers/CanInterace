@@ -27,6 +27,18 @@ namespace CanInterface.MCP2515
         /// </summary>
         public byte[] Data { get; set; } = new byte[8];
 
+        public CanMessage(uint id, bool remote, byte[] data)
+        {
+            if(data.Length > 8)
+            {
+                throw new ArgumentException("Data block must be less than or equal to 8 bytes");
+            }
+
+            CanId = id;
+            IsRemote = remote;
+            Data = data;
+        }
+
         /// <summary>
         /// Creates a new can message from the SIDH, SIDL, EID8, EID0, and DLC registers with the given byte array data
         /// </summary>

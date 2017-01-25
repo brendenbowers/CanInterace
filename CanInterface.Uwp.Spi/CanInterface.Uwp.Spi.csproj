@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{9169CBC6-8D78-406E-812E-89C7A741519B}</ProjectGuid>
+    <ProjectGuid>{2CD1CBC8-C3ED-4012-ABE9-554EFA07BE24}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CanInterface.Test</RootNamespace>
-    <AssemblyName>CanInterface.Test</AssemblyName>
+    <RootNamespace>CanInterface.Uwp.Spi</RootNamespace>
+    <AssemblyName>CanInterface.Uwp.Spi</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.14393.0</TargetPlatformVersion>
@@ -107,12 +107,19 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MCP2515\BitStructures\CanControlRegisterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Properties\CanInterface.Test.rd.xml" />
+    <Compile Include="WindowsSpiDevice.cs" />
+    <Compile Include="WindowsSpiDeviceConnectionSettings.cs" />
+    <EmbeddedResource Include="Properties\CanInterface.Uwp.Spi.rd.xml" />
   </ItemGroup>
-  <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '15.0' ">
-    <VisualStudioVersion>15.0</VisualStudioVersion>
+  <ItemGroup>
+    <ProjectReference Include="..\CanInterface\CanInterface.csproj">
+      <Project>{bd3cd56d-6db5-4084-9ac9-1e04c91ccc12}</Project>
+      <Name>CanInterface</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
+    <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

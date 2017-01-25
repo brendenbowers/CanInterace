@@ -13,10 +13,10 @@ namespace CanInterface.MCP2515
     public partial class Controller
     {
 
-        public async Task InitAsync(BaudRate baudRate, byte frequency, byte syncJumpWidth)
+        public async Task InitAsync(BaudRate baudRate, byte frequency, SyncronizationJumpWidth syncJumpWidth)
         {
             await ResetAsync();
-            await SetBaudRateAsync(baudRate, frequency, syncJumpWidth);
+            await SetBaudRateAsync(baudRate, frequency, (byte)((byte)syncJumpWidth >> 5));
         }
 
 
@@ -153,6 +153,18 @@ namespace CanInterface.MCP2515
         public Task<CanInterruptFlagRegister> ReadInterruptFlagsAsync()
         {
             return Task.Run(() => ReadInteruptFlags());
+        }
+
+        /// <summary>
+        /// Sets the operating mode of the Device
+        /// </summary>
+        /// <param name="mode"></param>
+        /// <param name="rx0BufferMode"></param>
+        /// <param name="rx1BufferMode"></param>
+        /// <param name="rollOverBuffer0To1"></param>
+        public Task SetOperatingModeAsync(OperatingMode mode, ReceiveBufferOperatingMode rx0BufferMode, ReceiveBufferOperatingMode rx1BufferMode, bool rollOverBuffer0To1)
+        {
+            return Task.Run(() => SetOperatingMode(mode, rx0BufferMode, rx1BufferMode, rollOverBuffer0To1));
         }
     }
 }

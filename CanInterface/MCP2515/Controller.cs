@@ -13,7 +13,7 @@ namespace CanInterface.MCP2515
     public partial class Controller : IController
     {
 
-        public TimeSpan ResetDefultTimeout { get; set; } = TimeSpan.FromSeconds(1);
+        public TimeSpan ResetDefultTimeout { get; set; } = TimeSpan.FromSeconds(30);
         public TimeSpan TransmitDefaultTimeout { get; set; } = TimeSpan.FromSeconds(1);
         public TimeSpan ReceiveDefaultTimeout { get; set; } = TimeSpan.FromSeconds(1);
 
@@ -23,12 +23,7 @@ namespace CanInterface.MCP2515
 
         public Controller(Spi.ISpiDevice device)
         {
-            if(device == null)
-            {
-                throw new ArgumentNullException(nameof(device));
-            }
-
-            SpiDevice = device;
+            SpiDevice = device ?? throw new ArgumentNullException(nameof(device));
         }
 
         /// <summary>
@@ -36,10 +31,20 @@ namespace CanInterface.MCP2515
         /// </summary>
         /// <param name="resetTimeout"></param>
         /// <returns></returns>
-        public void Init(BaudRate baudRate, byte frequency, byte syncJumpWidth)
+        public void Init(BaudRate baudRate, byte frequency, SyncronizationJumpWidth syncJumpWidth)
         {
             Reset();
-            SetBaudRate(baudRate, frequency, syncJumpWidth);
+
+            //Reset the interrupts and transmit control registers
+            WriteRegister(Registers.CANINTE, new CanInterruptEnableRegister(0));
+            WriteRegister(Registers.TXB0CTRL, new TransmitBufferControlRegister((byte)0));
+            WriteRegister(Registers.TXB1CTRL, new TransmitBufferControlRegister((byte)0));
+            WriteRegister(Registers.TXB2CTRL, new TransmitBufferControlRegister((byte)0));
+
+            if(!SetBaudRate(baudRate, frequency, (byte)((byte)syncJumpWidth >> 5)))
+            {
+                throw new InvalidConfigurationException($"Unable to correctly configure the device with the settings. BaudRate: {baudRate}. Freq: {frequency}. JumpWidth: {syncJumpWidth}");
+            }
         }
         
         /// <summary>
@@ -227,14 +232,33 @@ namespace CanInterface.MCP2515
 
             for (int i = 5; i < 1000; i += 5)
             {
-                SetBaudRate(i, frequency, syncJumpWidth);
-                Task.Delay(500).Wait();
-                CanInterruptFlagRegister interrupt = ReadRegister(Registers.CANINTF);
-
-                if(!interrupt.MERRF)
+                try
                 {
-                    return true;
+                    SetBaudRate(i, frequency, syncJumpWidth);
+                    SetOperatingMode(OperatingMode.ListenOnly, ReceiveBufferOperatingMode.AcceptAll, ReceiveBufferOperatingMode.AcceptAll, true);
+                    CanInterruptFlagRegister interrupt;
+
+                    int attempts = 0;
+
+                    do
+                    {
+                        Task.Delay(TimeSpan.FromMilliseconds(500)).Wait();
+                        interrupt = ReadRegister(Registers.CANINTF);
+                    }
+                    while (!interrupt.RX0IF && !interrupt.RX1IF && ++attempts < 40);
+                    
+                    if (!interrupt.MERRF)
+                    {
+                        return true;
+                    }
+
+                    Reset();
                 }
+                catch(InvalidConfigurationException icex)
+                {
+                    //just eat the exception
+                }
+
 
             }
 
@@ -259,46 +283,49 @@ namespace CanInterface.MCP2515
                 syncJumpWidth = 4;
             }
 
-            float nominalBitTime = 1.0f / baudRate * 1000;
+            
             float timeQuantum = 0f;
-            byte bitRatePrescaler = 0;
+            byte baudRatePrescaler = 0;
             byte bitTiming = 0;
             float tempBitTiming = 0f;
 
-            for (bitRatePrescaler = 0; bitRatePrescaler < 8; bitRatePrescaler++)
+
+            float nominalBitTime = 1.0f / ((float)baudRate) * 1000.0f;
+
+            for (baudRatePrescaler = 0; baudRatePrescaler < 8; baudRatePrescaler++)
             {
-                timeQuantum = 2.0f * (bitRatePrescaler + 1) / frequency;
+                timeQuantum = 2.0f * ((float)(baudRatePrescaler + 1)) / ((float)frequency);
                 tempBitTiming = nominalBitTime / timeQuantum;
                 if(tempBitTiming <= 25)
                 {
                     bitTiming = (byte)tempBitTiming;
-                    if(tempBitTiming == 0)
+                    if(tempBitTiming - bitTiming == 0)
                     {
                         break;
                     }   
                 }
             }
 
-            byte Spt = (byte)(0.7 * bitTiming);
-            byte PrSeg = (byte)((Spt - 1) / 2);
-            byte PhSeg1 = (byte)(Spt - PrSeg - 1);
-            byte PhSeg2 = (byte)(bitTiming - PhSeg1 - PrSeg - 1);
+            byte samplePoint = (byte)(0.7 * bitTiming);
+            byte propagationSegment = (byte)((samplePoint - 1) / 2);
+            byte phaseSegment1 = (byte)(samplePoint - propagationSegment - 1);
+            byte phaseSegment2 = (byte)(bitTiming - phaseSegment1 - propagationSegment - 1);
 
-            if(PrSeg + PhSeg1 < PhSeg2)
+            if(propagationSegment + phaseSegment1 < phaseSegment2)
             {
-                throw new InvalidConfigurationException("PRSEG, PHSEG1 and PHSEG2 are out of the expected ranges");
+                throw new InvalidConfigurationException($"PropagationSegment ({propagationSegment}), PhaseSegment1({phaseSegment1}) and PhaseSegment2({phaseSegment2}) are out of the expected ranges");
             }
 
-            if(PhSeg2 <= syncJumpWidth)
+            if(phaseSegment2 <= syncJumpWidth)
             {
-                throw new InvalidConfigurationException("PHSEG2 is  out of the expected range");
+                throw new InvalidConfigurationException($"PhaseSegment2({phaseSegment2}) is  out of the expected range");
             }
 
 
-            var cnf1 = new Configuration1Register((SyncronizationJumpWidth)syncJumpWidth, bitRatePrescaler);
+            var cnf1 = new Configuration1Register((SyncronizationJumpWidth)(syncJumpWidth << 5), baudRatePrescaler);
             WriteRegister(Registers.CNF1, cnf1);
-            WriteRegister(Registers.CNF2, new Configuration2Register(true, false, (byte)(PhSeg1 -1), (byte)(PrSeg -1)));
-            WriteRegister(Registers.CNF3, new Configuration3Register(false,false, (byte)(PhSeg2 -1)));
+            WriteRegister(Registers.CNF2, new Configuration2Register(true, false, (byte)(phaseSegment1 -1), (byte)(propagationSegment -1)));
+            WriteRegister(Registers.CNF3, new Configuration3Register(false,false, (byte)(phaseSegment2 -1)));
             WriteRegister(Registers.TXRTSCTRL, new TransmitPinControlAndStatusRegister(false, false, false));
 
             var readCnf1 = (Configuration1Register)ReadRegister(Registers.CNF1);
@@ -418,7 +445,7 @@ namespace CanInterface.MCP2515
         }
                 
         /// <summary>
-        /// 
+        /// Sets the operating mode of the Device
         /// </summary>
         /// <param name="mode"></param>
         /// <param name="rx0BufferMode"></param>
@@ -439,8 +466,11 @@ namespace CanInterface.MCP2515
                 throw new InvalidOperatingModeExcpetion(newOperatingMode.REQOP, status.OperatingMode);
             }
 
+            //configure the read bufffers
             WriteRegister(Registers.RXB0CTRL, new ReceiveBuffer0ControlRegister(rx0BufferMode, rollOverBuffer0To1));
             WriteRegister(Registers.RXB1CTRL, new ReceiveBuffer1ControlRegister(rx1BufferMode));
+            //enable all the registers
+            WriteRegister(Registers.CANINTE, new CanInterruptEnableRegister(0b1111_1111));
         }
 
 

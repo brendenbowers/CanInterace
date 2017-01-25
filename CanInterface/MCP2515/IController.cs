@@ -11,8 +11,8 @@ namespace CanInterface.MCP2515
         TimeSpan ResetDefultTimeout { get; set; }
         TimeSpan TransmitDefaultTimeout { get; set; }
 
-        void Init(BaudRate baudRate, byte frequency, byte syncJumpWidth);
-        Task InitAsync(BaudRate baudRate, byte frequency, byte syncJumpWidth);
+        void Init(BaudRate baudRate, byte frequency, SyncronizationJumpWidth syncJumpWidth);
+        Task InitAsync(BaudRate baudRate, byte frequency, SyncronizationJumpWidth syncJumpWidth);
         void LoadTxBuffer(LoadTxBuffer bufferToLoad, byte[] values);
         Task LoadTxBufferAsync(LoadTxBuffer bufferToLoad, byte[] values);
         CanStatusRegister ReadCanStatus();
@@ -40,5 +40,6 @@ namespace CanInterface.MCP2515
         Task WriteRegisterAsync(byte register, byte value);
         void WriteRegisterBit(byte register, byte bitNumber, byte value);
         Task WriteRegisterBitAsync(byte register, byte bitNumber, byte value);
+        Task SetOperatingModeAsync(OperatingMode mode, ReceiveBufferOperatingMode rx0BufferMode, ReceiveBufferOperatingMode rx1BufferMode, bool rollOverBuffer0To1);
     }
 }
