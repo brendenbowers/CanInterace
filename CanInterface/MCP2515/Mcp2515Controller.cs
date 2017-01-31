@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace CanInterface.MCP2515
 {
-    public partial class Controller : IController
+    public partial class Mcp2515Controller : IMcp2515Controller
     {
 
         public TimeSpan ResetDefultTimeout { get; set; } = TimeSpan.FromSeconds(30);
@@ -21,7 +21,7 @@ namespace CanInterface.MCP2515
         protected Spi.ISpiDevice SpiDevice = null;
 
 
-        public Controller(Spi.ISpiDevice device)
+        public Mcp2515Controller(Spi.ISpiDevice device)
         {
             SpiDevice = device ?? throw new ArgumentNullException(nameof(device));
         }
@@ -415,7 +415,7 @@ namespace CanInterface.MCP2515
         /// SIDH, SIDL, EID8, EID0, DLC, D0-D7</returns>
         public byte[] ReadRxBuffer(ReadRxBuffer location)
         {
-            int bufferSize = 12;
+            int bufferSize = 13;
             if(location == Enum.ReadRxBuffer.RXB0DO || location == Enum.ReadRxBuffer.RXB1D0)
             {
                 bufferSize = 8;

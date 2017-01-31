@@ -13,7 +13,7 @@ namespace CanInterface.Can
     /// <summary>
     /// Manages the Controller to recieve messages by polling the controller
     /// </summary>
-    public class MCP2515CanDevice : IDisposable
+    public class CanDevice : IDisposable
     {
         /// <summary>
         /// Invoked when a message is read from the controller
@@ -31,17 +31,17 @@ namespace CanInterface.Can
         /// <summary>
         /// The controller used to communicate with the can network
         /// </summary>
-        public IController Controller { get; protected set; }
+        public IMcp2515Controller Controller { get; protected set; }
         /// <summary>
         /// The amount of time to wait betweem polling for read messages (Default: 100 ms).
         /// </summary>
         public TimeSpan ReadPollingWaitPeriod { get; set; } = TimeSpan.FromMilliseconds(100);
 
         /// <summary>
-        /// Creates an instance of the <see cref="MCP2515CanDevice"/>
+        /// Creates an instance of the <see cref="CanDevice"/>
         /// </summary>
         /// <param name="controller">The controller to communicate with</param>
-        public MCP2515CanDevice(IController controller)
+        public CanDevice(IMcp2515Controller controller)
         {
             Controller = controller ?? throw new ArgumentNullException(nameof(controller));
 
@@ -79,7 +79,7 @@ namespace CanInterface.Can
 
         protected void ReceiveWorker(object sync)
         {
-            (CancellationToken token, IController controller, TimeSpan readWaitTime) = ((CancellationToken, IController, TimeSpan))sync;
+            (CancellationToken token, IMcp2515Controller controller, TimeSpan readWaitTime) = ((CancellationToken, IMcp2515Controller, TimeSpan))sync;
 
             var wait = new ManualResetEventSlim(false);
 
@@ -114,7 +114,7 @@ namespace CanInterface.Can
 
         protected void TransmitWorker(object sync)
         {
-            (CancellationToken token, IController controller, ManualResetEventSlim waitForWork, ConcurrentQueue<(CanMessage, int)> messages) = ((CancellationToken, IController, ManualResetEventSlim, ConcurrentQueue<(CanMessage, int)>))sync;
+            (CancellationToken token, IMcp2515Controller controller, ManualResetEventSlim waitForWork, ConcurrentQueue<(CanMessage, int)> messages) = ((CancellationToken, IMcp2515Controller, ManualResetEventSlim, ConcurrentQueue<(CanMessage, int)>))sync;
 
 
             while (!token.IsCancellationRequested)

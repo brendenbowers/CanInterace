@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace CanInterface.MCP2515
 {
-    public partial class Controller
+    public partial class Mcp2515Controller
     {
 
         public async Task InitAsync(BaudRate baudRate, byte frequency, SyncronizationJumpWidth syncJumpWidth)
