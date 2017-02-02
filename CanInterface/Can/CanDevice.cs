@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.Devices.NetStandardWrappers.Gpio;
 
 namespace CanInterface.Can
 {
@@ -27,6 +28,7 @@ namespace CanInterface.Can
         protected CancellationTokenSource WriteTaskCancellationToken = null;
         protected ConcurrentQueue<(CanMessage, int)> TransmitQueue = new ConcurrentQueue<(CanMessage, int)>();
         protected ManualResetEventSlim TransmitWait = new ManualResetEventSlim(false);
+        protected IGpioPin GpioPin { get; set; }
 
         /// <summary>
         /// The controller used to communicate with the can network
@@ -41,15 +43,18 @@ namespace CanInterface.Can
         /// Creates an instance of the <see cref="CanDevice"/>
         /// </summary>
         /// <param name="controller">The controller to communicate with</param>
-        public CanDevice(IMcp2515Controller controller)
+        public CanDevice(IMcp2515Controller controller, IGpioPin gpioPin = null, GpioPinEdge? resetOnEdge = null)
         {
             Controller = controller ?? throw new ArgumentNullException(nameof(controller));
+            GpioPin = gpioPin;
 
             ReadTaskCancellationToken = new CancellationTokenSource();
-            ReadTask = new Task(ReceiveWorker, (ReadTaskCancellationToken.Token, controller, ReadPollingWaitPeriod), ReadTaskCancellationToken.Token, TaskCreationOptions.LongRunning);
+            ReadTask = new Task(ReceiveWorker, (ReadTaskCancellationToken.Token, controller, ReadPollingWaitPeriod, (gpioPin != null ? new PinWait(gpioPin, false, resetOnEdge.Value) : null)), 
+                ReadTaskCancellationToken.Token, TaskCreationOptions.LongRunning);
 
             WriteTaskCancellationToken = new CancellationTokenSource();
-            WriteTask = new Task(TransmitWorker, (WriteTaskCancellationToken.Token, controller, TransmitWait, TransmitQueue), WriteTaskCancellationToken.Token, TaskCreationOptions.LongRunning);
+            WriteTask = new Task(TransmitWorker, (WriteTaskCancellationToken.Token, controller, TransmitWait, TransmitQueue, (gpioPin != null ? new PinWait(gpioPin, false, resetOnEdge.Value) : null)), 
+                WriteTaskCancellationToken.Token, TaskCreationOptions.LongRunning);
         }
 
         /// <summary>
@@ -79,9 +84,9 @@ namespace CanInterface.Can
 
         protected void ReceiveWorker(object sync)
         {
-            (CancellationToken token, IMcp2515Controller controller, TimeSpan readWaitTime) = ((CancellationToken, IMcp2515Controller, TimeSpan))sync;
+            (CancellationToken token, IMcp2515Controller controller, TimeSpan readWaitTime, PinWait gpioPinWait) = ((CancellationToken, IMcp2515Controller, TimeSpan, PinWait))sync;
 
-            var wait = new ManualResetEventSlim(false);
+            var timedWait = new ManualResetEventSlim(false);
 
             bool read = false;
             CanMessage message = null;
@@ -101,8 +106,16 @@ namespace CanInterface.Can
 
                 try
                 {
-                    //use a eventwait to sleep as we do not have access to thread.sleep
-                    wait.Wait(readWaitTime, token);
+                    if(gpioPinWait != null)
+                    {
+                        gpioPinWait.Wait(token);
+                    }
+                    else
+                    {
+                        //use a eventwait to sleep as we do not have access to thread.sleep
+                        timedWait.Wait(readWaitTime, token);
+                    }
+
                 }
                 catch(OperationCanceledException)
                 { 
@@ -114,8 +127,7 @@ namespace CanInterface.Can
 
         protected void TransmitWorker(object sync)
         {
-            (CancellationToken token, IMcp2515Controller controller, ManualResetEventSlim waitForWork, ConcurrentQueue<(CanMessage, int)> messages) = ((CancellationToken, IMcp2515Controller, ManualResetEventSlim, ConcurrentQueue<(CanMessage, int)>))sync;
-
+            (CancellationToken token, IMcp2515Controller controller, ManualResetEventSlim waitForWork, ConcurrentQueue<(CanMessage, int)> messages, PinWait gpioPinWait) = ((CancellationToken, IMcp2515Controller, ManualResetEventSlim, ConcurrentQueue<(CanMessage, int)>, PinWait))sync;
 
             while (!token.IsCancellationRequested)
             {
@@ -139,6 +151,7 @@ namespace CanInterface.Can
 
                 try
                 {
+
                     waitForWork.Wait(token);
                 }
                 catch (OperationCanceledException)

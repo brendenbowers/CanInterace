@@ -40,5 +40,15 @@ namespace UwpImplementation.Windows.Devices.NetStandardWrappers.Gpio
         {
             ValueChanged?.Invoke(sender, new GpioPinValueChangedEventArgs((GpioPinEdge)(int)args.Edge));
         }
+
+        public static implicit operator WinGpio.GpioPin(WindowsGpioPin gpioPin)
+        {
+            return gpioPin.GpioPin;
+        }
+
+        public static implicit operator WindowsGpioPin(WinGpio.GpioPin gpioPin)
+        {
+            return new WindowsGpioPin(gpioPin);
+        }
     }
 }

@@ -10,6 +10,7 @@ using CanInterface.MCP2515.Enum;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using UwpImplementation.Windows.Devices.NetStandardWrappers.Spi;
+using UwpImplementation.Windows.Devices.NetStandardWrappers.Gpio;
 
 // The Background Application template is documented at http://go.microsoft.com/fwlink/?LinkID=533884&clcid=0x409
 
@@ -71,7 +72,7 @@ namespace CanLogger
                     ClockFrequency= 10000000,
                 });
             
-            var mcp2515CanDevice = new CanDevice(new CanInterface.MCP2515.Mcp2515Controller((WindowsSpiDevice)device));
+            var mcp2515CanDevice = new CanDevice(new CanInterface.MCP2515.Mcp2515Controller((WindowsSpiDevice)device), (WindowsGpioPin)pin, Windows.Devices.NetStandardWrappers.Gpio.GpioPinEdge.FallingEdge);
 
             //var logger = NLog.LogManager.GetLogger("can-message");
 
