@@ -7,8 +7,8 @@
     <ProjectGuid>{2CD1CBC8-C3ED-4012-ABE9-554EFA07BE24}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CanInterface.Uwp.Spi</RootNamespace>
-    <AssemblyName>CanInterface.Uwp.Spi</AssemblyName>
+    <RootNamespace>UwpImplementation.Windows.Devices.NetStandardWrappers</RootNamespace>
+    <AssemblyName>UwpImplementation.Windows.Devices.NetStandardWrappers</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.14393.0</TargetPlatformVersion>
@@ -107,15 +107,20 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Gpio\WindowsGpioPin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WindowsSpiDevice.cs" />
-    <Compile Include="WindowsSpiDeviceConnectionSettings.cs" />
+    <Compile Include="Spi\WindowsSpiDevice.cs" />
+    <Compile Include="Spi\WindowsSpiDeviceConnectionSettings.cs" />
     <EmbeddedResource Include="Properties\CanInterface.Uwp.Spi.rd.xml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CanInterface\CanInterface.csproj">
       <Project>{bd3cd56d-6db5-4084-9ac9-1e04c91ccc12}</Project>
       <Name>CanInterface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Windows.Devices.NetStandardWrappers\Windows.Devices.NetStandardWrappers.csproj">
+      <Project>{876077c1-3c5e-4774-afb8-fd6baf6a9130}</Project>
+      <Name>Windows.Devices.NetStandardWrappers</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

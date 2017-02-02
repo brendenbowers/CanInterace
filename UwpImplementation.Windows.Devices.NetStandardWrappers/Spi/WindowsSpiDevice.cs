@@ -1,12 +1,12 @@
-﻿using CanInterface.Spi;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Devices.NetStandardWrappers.Spi;
 using WinSpi = Windows.Devices.Spi;
 
-namespace CanInterface.Uwp.Spi
+namespace UwpImplementation.Windows.Devices.NetStandardWrappers.Spi
 {
     public class WindowsSpiDevice : ISpiDevice
     {

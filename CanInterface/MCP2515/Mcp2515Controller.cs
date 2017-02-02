@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Devices.NetStandardWrappers.Spi;
 
 namespace CanInterface.MCP2515
 {
@@ -18,10 +19,10 @@ namespace CanInterface.MCP2515
         public TimeSpan ReceiveDefaultTimeout { get; set; } = TimeSpan.FromSeconds(1);
 
 
-        protected Spi.ISpiDevice SpiDevice = null;
+        protected ISpiDevice SpiDevice = null;
 
 
-        public Mcp2515Controller(Spi.ISpiDevice device)
+        public Mcp2515Controller(ISpiDevice device)
         {
             SpiDevice = device ?? throw new ArgumentNullException(nameof(device));
         }

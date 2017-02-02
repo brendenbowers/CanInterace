@@ -79,6 +79,10 @@
       <Project>{bd3cd56d-6db5-4084-9ac9-1e04c91ccc12}</Project>
       <Name>CanInterface</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Windows.Devices.NetStandardWrappers\Windows.Devices.NetStandardWrappers.csproj">
+      <Project>{876077c1-3c5e-4774-afb8-fd6baf6a9130}</Project>
+      <Name>Windows.Devices.NetStandardWrappers</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

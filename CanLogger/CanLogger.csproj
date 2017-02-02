@@ -131,13 +131,17 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CanInterface.Uwp.Spi\CanInterface.Uwp.Spi.csproj">
+    <ProjectReference Include="..\UwpImplementation.Windows.Devices.NetStandardWrappers\UwpImplementation.Windows.Devices.NetStandardWrappers.csproj">
       <Project>{2CD1CBC8-C3ED-4012-ABE9-554EFA07BE24}</Project>
-      <Name>CanInterface.Uwp.Spi</Name>
+      <Name>UwpImplementation.Windows.Devices.NetStandardWrappers</Name>
     </ProjectReference>
     <ProjectReference Include="..\CanInterface\CanInterface.csproj">
       <Project>{bd3cd56d-6db5-4084-9ac9-1e04c91ccc12}</Project>
       <Name>CanInterface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Windows.Devices.NetStandardWrappers\Windows.Devices.NetStandardWrappers.csproj">
+      <Project>{876077C1-3C5E-4774-AFB8-FD6BAF6A9130}</Project>
+      <Name>Windows.Devices.NetStandardWrappers</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '15.0' ">

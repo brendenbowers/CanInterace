@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CanInterface.Spi
+namespace Windows.Devices.NetStandardWrappers.Spi
 {
     public interface ISpiDevice : IDisposable
     {
