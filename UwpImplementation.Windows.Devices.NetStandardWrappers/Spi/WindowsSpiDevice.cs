@@ -8,7 +8,7 @@ using WinSpi = Windows.Devices.Spi;
 
 namespace UwpImplementation.Windows.Devices.NetStandardWrappers.Spi
 {
-    public class WindowsSpiDevice : ISpiDevice
+    public class WindowsSpiDevice : ISpiDevice, CanInterface.IDevice
     {
 
         public WinSpi.SpiDevice SpiDevice { get; protected set; }
@@ -48,6 +48,11 @@ namespace UwpImplementation.Windows.Devices.NetStandardWrappers.Spi
         public void Write(byte[] buffer)
         {
             SpiDevice.Write(buffer);
+        }
+
+        public void Write(byte[] toWrite, byte[] response)
+        {
+            SpiDevice.TransferSequential(toWrite, response);
         }
 
         public static implicit operator WinSpi.SpiDevice(WindowsSpiDevice device)

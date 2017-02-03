@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Windows.Devices.NetStandardWrappers.Spi;
 
 namespace CanInterface.MCP2515
 {
@@ -19,12 +18,12 @@ namespace CanInterface.MCP2515
         public TimeSpan ReceiveDefaultTimeout { get; set; } = TimeSpan.FromSeconds(1);
 
 
-        protected ISpiDevice SpiDevice = null;
+        protected IDevice Device = null;
 
 
-        public Mcp2515Controller(ISpiDevice device)
+        public Mcp2515Controller(IDevice device)
         {
-            SpiDevice = device ?? throw new ArgumentNullException(nameof(device));
+            Device = device ?? throw new ArgumentNullException(nameof(device));
         }
 
         /// <summary>
@@ -55,7 +54,7 @@ namespace CanInterface.MCP2515
         /// <returns></returns>
         public void Reset(TimeSpan? resetTimeout = null)
         {
-            SpiDevice.Write(Commands.RESET);
+            Device.Write(Commands.RESET);
 
             var timeOut = DateTime.Now.Add(resetTimeout ?? ResetDefultTimeout);
 
@@ -346,7 +345,7 @@ namespace CanInterface.MCP2515
         public byte ReadRegister(byte register)
         {
             var readBuffer = new byte[1];
-            SpiDevice.TransferSequential(new[] { Commands.READ, register }, readBuffer);
+            Device.Write(new[] { Commands.READ, register }, readBuffer);
             return readBuffer[0];
         }
 
@@ -361,7 +360,7 @@ namespace CanInterface.MCP2515
             toWrite[0] = Commands.WRITE;
             toWrite[1] = register;
             Array.ConstrainedCopy(value, 0, toWrite, 2, value.Length);
-            SpiDevice.Write(toWrite);
+            Device.Write(toWrite);
         }
         
         /// <summary>
@@ -371,7 +370,7 @@ namespace CanInterface.MCP2515
         /// <param name="value">The value to write</param>
         public void WriteRegister(byte register, byte value)
         {
-            SpiDevice.Write(Commands.WRITE, register, value);
+            Device.Write(Commands.WRITE, register, value);
         }
 
         /// <summary>
@@ -382,7 +381,7 @@ namespace CanInterface.MCP2515
         /// <param name="value">The value to set the bit to</param>
         public void WriteRegisterBit(byte register, byte bitNumber, byte value)
         {
-            SpiDevice.Write(Commands.BIT_MODIFY, register, ((byte)(1 << bitNumber)), (byte)(value == 0 ? 0b0000_0000 : 0b1111_1111));
+            Device.Write(Commands.BIT_MODIFY, register, ((byte)(1 << bitNumber)), (byte)(value == 0 ? 0b0000_0000 : 0b1111_1111));
         }
 
         /// <summary>
@@ -393,7 +392,7 @@ namespace CanInterface.MCP2515
         /// <param name="transmit0">Send the tx2 buffer</param>
         public void RequestToSend(bool transmit2, bool transmit1, bool transmit0)
         {
-            SpiDevice.Write(Commands.RTS.Set(2, transmit2).Set(1, transmit1).Set(0, transmit0));
+            Device.Write(Commands.RTS.Set(2, transmit2).Set(1, transmit1).Set(0, transmit0));
         }
 
         /// <summary>
@@ -403,7 +402,7 @@ namespace CanInterface.MCP2515
         public ReadStatusInstructionResponse ReadStatus()
         {
             var buffer = new byte[1];
-            SpiDevice.TransferSequential(new byte[] { Commands.READ_STATUS }, buffer);
+            Device.Write(new byte[] { Commands.READ_STATUS }, buffer);
 
             return buffer[0];
         }
@@ -424,7 +423,7 @@ namespace CanInterface.MCP2515
 
             byte[] buffer = new byte[bufferSize];
 
-            SpiDevice.TransferSequential(new byte[] { (byte)location }, buffer);
+            Device.Write(new byte[] { (byte)location }, buffer);
 
             return buffer;
         }
@@ -442,7 +441,7 @@ namespace CanInterface.MCP2515
             buffer[0] = (byte)bufferToLoad;
             Array.ConstrainedCopy(values, 0, buffer, 1, values.Length);
 
-            SpiDevice.Write(buffer);
+            Device.Write(buffer);
         }
                 
         /// <summary>
