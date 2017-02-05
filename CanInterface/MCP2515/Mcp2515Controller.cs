@@ -473,7 +473,10 @@ namespace CanInterface.MCP2515
             WriteRegister(Registers.CANINTE, new CanInterruptEnableRegister(0b1111_1111));
         }
 
-
+        public void Dispose()
+        {
+            Device?.Dispose();
+        }
     }
 }
 

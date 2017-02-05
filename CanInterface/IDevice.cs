@@ -4,7 +4,7 @@ using System.Text;
 
 namespace CanInterface
 {
-    public interface IDevice
+    public interface IDevice : IDisposable
     {
         /// <summary>
         /// Writes the bites to the device and returns the response read

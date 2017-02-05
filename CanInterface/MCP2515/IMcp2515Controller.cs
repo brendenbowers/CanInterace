@@ -5,7 +5,7 @@ using CanInterface.MCP2515.Enum;
 
 namespace CanInterface.MCP2515
 {
-    public interface IMcp2515Controller
+    public interface IMcp2515Controller : IDisposable
     {
         TimeSpan ReceiveDefaultTimeout { get; set; }
         TimeSpan ResetDefultTimeout { get; set; }

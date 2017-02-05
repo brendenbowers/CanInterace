@@ -180,6 +180,10 @@ namespace CanInterface.Can
             {
                 throw new TimeoutException("Timeout waiting for write thread to shutdown");
             }
+
+            Controller?.Dispose();
+            GpioPin?.Dispose();
+            
         }
         
     }

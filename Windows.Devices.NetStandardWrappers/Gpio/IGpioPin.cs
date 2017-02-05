@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Windows.Devices.NetStandardWrappers.Gpio
 {
-    public interface IGpioPin
+    public interface IGpioPin : IDisposable
     {
 
         event EventHandler<GpioPinValueChangedEventArgs> ValueChanged;

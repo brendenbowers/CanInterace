@@ -1,4 +1,5 @@
 ﻿using CanInterface.MCP2515;
+using CanInterface.MCP2515.BitStructures;
 using CanInterface.MCP2515.Enum;
 using Moq;
 using NUnit.Framework;
@@ -65,6 +66,36 @@ namespace CanInterface.Tests.Mcp2515
 
             Assert.That(() => Controller.WriteRegister(register, values), Throws.Nothing);
             Assert.That(dataWritten, Is.EqualTo(expected));
+        }
+
+        [TestCase]
+        public void  Mcp2515ControllerReadStatus()
+        {
+            var expectedOuput = new ReadStatusInstructionResponse(0b0101_1010);
+            byte[] inputData = null;
+            Device.Setup(m => m.Write(It.IsAny<byte[]>(), It.IsAny<byte[]>()))
+                .Callback<byte[], byte[]>(
+                    (input, output) => {
+                        inputData = input;
+                        output[0] = 0b0101_1010;
+                    });
+
+            var status = Controller.ReadStatus();
+
+            Assert.That(status.CANINTFL_RX1IF, Is.EqualTo(expectedOuput.CANINTFL_RX1IF));
+            Assert.That(status.CANINTF_RX0IF, Is.EqualTo(expectedOuput.CANINTF_RX0IF));
+            Assert.That(status.CANINTF_TX0IF, Is.EqualTo(expectedOuput.CANINTF_TX0IF));
+            Assert.That(status.CANINTF_TX1IF, Is.EqualTo(expectedOuput.CANINTF_TX1IF));
+            Assert.That(status.CANINTF_TX2IF, Is.EqualTo(expectedOuput.CANINTF_TX2IF));
+            Assert.That(status.TXB0CNTRL_TXREQ, Is.EqualTo(expectedOuput.TXB0CNTRL_TXREQ));
+            Assert.That(status.TXB1CNTRL_TXREQ, Is.EqualTo(expectedOuput.TXB1CNTRL_TXREQ));
+            Assert.That(status.TXB1CNTRL_TXREQ, Is.EqualTo(expectedOuput.TXB1CNTRL_TXREQ));
+        }
+
+        [TestCase()]
+        public void Mcp2515ControllerReadRxBuffer()
+        {
+
         }
     }
 }
