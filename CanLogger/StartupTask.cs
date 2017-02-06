@@ -68,14 +68,14 @@ namespace CanLogger
 
                             canDevice.CanMessageRecieved += async (object sender, CanMessageEvent message) =>
                             {
-                                var msg = $"0x{message.Message.CanId.ToString("X4")} - {message.Message.Data.Aggregate(new StringBuilder(), (sb, b) => sb.Append($"0x{b.ToString("X2")} ")).ToString()}";
-                                Debug.WriteLine($"Can Message: {msg}");
+                                var msg = $"0x{message.Message.CanId.ToString("X4")} - {message.Message.Data.Aggregate(new StringBuilder(), (sb, b) => sb.Append($"0x{b.ToString("X2")} ")).ToString()}{Environment.NewLine}";
+                                Debug.Write($"Can Message: {msg}");
                                 messageLog.WriteString(msg);
                                 await messageLog.StoreAsync();
                             };
                             
                             await canDevice.Controller.InitAsync(BaudRate.Can500K, 16, SyncronizationJumpWidth.OneXTQ);
-                            await canDevice.Controller.SetOperatingModeAsync(OperatingMode.Normal, ReceiveBufferOperatingMode.AcceptAll, ReceiveBufferOperatingMode.AcceptAll, true);
+                            await canDevice.Controller.SetOperatingModeAsync(OperatingMode.ListenOnly, ReceiveBufferOperatingMode.AcceptAll, ReceiveBufferOperatingMode.AcceptAll, true);
                             
                             canDevice.StartReceiving();
                             waitForCancel.Wait();
